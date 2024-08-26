@@ -1,3 +1,4 @@
+import { light } from "@mui/material/styles/createPalette";
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -12,6 +13,17 @@ const config: Config = {
         primary: '#64376E',
         secondary: '#4A9084',
         tertiary: '#B53475',
+
+        light: {
+          background: '#FFFFFF',
+          text: '#000000',
+          // Add other light mode colors here
+        },
+        dark: {
+          card: '#141414',
+          text: '#FFFFFF',
+          // Add other dark mode colors here
+        },
       },
       margin: {
         'small': '10px',  
@@ -31,10 +43,10 @@ const config: Config = {
     },
     screens: {
       'sm': '600px',
-      // => @media (min-width: 576px) { ... }
+      // => @media (min-width: 600px) { ... }
     
       'md': '850px',
-      // => @media (min-width: 768px) { ... }
+      // => @media (min-width: 850px) { ... }
     
       'lg': '1024px',
       // => @media (min-width: 1024px) { ... }
@@ -44,6 +56,9 @@ const config: Config = {
 
       '2xl': '1525px',
       // => @media (min-width: 1525px) { ... }
+
+      '3xl': '1920px',
+      // => @media (min-width: 1920px) { ... }
     },
   },
   plugins: [],

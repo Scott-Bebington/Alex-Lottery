@@ -32,6 +32,13 @@ body {
   }
 } */
 
+:root {
+  /* --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 239, 243, 252;
+  --background-end-rgb: 255, 255, 255; */
+  background-color: #f9f9f9;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
@@ -43,7 +50,6 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: #888;
-  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
