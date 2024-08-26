@@ -56,10 +56,6 @@ export default function Home() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [messageInfo, setMessageInfo] = useState<SnackbarMessage | undefined>(undefined);
 
-
-
-
-
   /*
   * Expanded state management
   */
@@ -73,11 +69,10 @@ export default function Home() {
       }, {} as { [key: string]: boolean }),
       [ticketNumber]: !prevState[ticketNumber] // Toggle the selected card
     }));
+
+    setTicketsAddedToCart(0);
+    setSelectedTicket(tickets.find(ticket => ticket.number === ticketNumber) || null);
   };
-
-
-
-
 
   /*
   * Snackbar functions
@@ -187,8 +182,13 @@ export default function Home() {
       setSelectedTicket(null);
 
       // Remove ticket from filtered tickets
-      const filtered = filteredTickets.filter(ticket => ticket.number !== selectedTicket.number);
-      setFilteredTickets(filtered);
+      if (selectedTicket.quantity === 0) {
+        const filtered = filteredTickets.filter(ticket => ticket.number !== selectedTicket.number);
+        setFilteredTickets(filtered);
+      }
+
+      handleExpandClick(selectedTicket.number);
+
     } catch (error) {
       openSnackbar = handleSnackbarOpen("Error adding tickets to cart", "error");
       openSnackbar();
@@ -206,11 +206,6 @@ export default function Home() {
     openSnackbar = handleSnackbarOpen(`Added ${ticketsAddedToCart} tickets to cart`, "success");
     openSnackbar();
   };
-
-  const deselectTicket = () => {
-    setSelectedTicket(null);
-    setTicketsAddedToCart(0);
-  }
 
   /*
   * Ticket filtering
@@ -292,9 +287,12 @@ export default function Home() {
         />
       </section>
 
-      <section className="flex flex-1 w-full overflow-hidden">
+      <section className="flex flex-1 w-full">
         <div
-          className="gap-4 flex flex-wrap justify-center overflow-y-auto p-small w-full"
+          className={[
+            "w-full p-small overflow-y-auto gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5",
+
+          ].join()}
           style={{ maxHeight: "calc(100vh - 12rem)", alignItems: "flex-start" }}
         >
           {!ticketsLoaded ? (
@@ -315,12 +313,8 @@ export default function Home() {
           ) : (
             filteredTickets.length > 0 ? (
               filteredTickets.map((ticket) => (
-                <Card
-                  sx={{
-                    maxWidth: 345,
-                    height: expandedState[ticket.number] ? 'auto' : 'fit-content', // Set height to fit content when expanded
-                    flexGrow: 0, // Prevent flex-grow from affecting the height
-                  }}
+                <div
+                  className='bg-white rounded shadow-sm'
                   key={ticket.number}
                 >
                   <CardMedia
@@ -328,38 +322,30 @@ export default function Home() {
                     height="140"
                     image={ticket.image}
                     alt="Lottery ticket image"
+                    className='rounded'
                   />
                   <CardContent>
-                    <div className='flex items-center justify-between'>
-                      <Typography variant="subtitle2" className='text-gray-400'>
-                        Draw Date: {ticket.date}
-                      </Typography>
-                      <Typography variant="subtitle2" className='text-gray-400'>
-                        {ticket.quantity} Left
-                      </Typography>
-                    </div>
-
-                    <div className='flex items-center justify-between'>
+                    <Typography variant="subtitle2" className='text-gray-400'>
+                      {ticket.quantity} Left
+                    </Typography>
+                    <section className='flex items-center justify-between'>
                       <Typography variant="h4">
                         {ticket.number}
                       </Typography>
-
                       <CardActions disableSpacing>
-                        <IconButton
-                          className={[
-                            "transform transition-transform",
-                            expandedState[ticket.number] ? "rotate-180" : "rotate-0"
-                          ].join(" ")}
+                        <div
+                          className="cursor-pointer border-solid border-2 border-slate-800 rounded px-small py-[2px]"
                           onClick={() => handleExpandClick(ticket.number)}
-                          aria-expanded={expandedState[ticket.number]}
-                          aria-label="Show more"
                         >
-                          <ExpandMoreIcon />
-                        </IconButton>
+                          {expandedState[ticket.number] ? "Close" : "Expand"}
+                        </div>
                       </CardActions>
-                    </div>
+                    </section>
 
                     <Collapse in={expandedState[ticket.number]} timeout="auto" unmountOnExit>
+                      <Typography variant="subtitle2" className='text-gray-400'>
+                        Draw Date: {ticket.date}
+                      </Typography>
                       <section className='flex items-center justify-between'>
                         <Typography variant="h5" className='text-slate-800'>
                           $ {ticket.cost.toFixed(2)}
@@ -407,7 +393,8 @@ export default function Home() {
                       </section>
                     </Collapse>
                   </CardContent>
-                </Card>
+                </div>
+
               ))
             ) : (
               <div className="flex w-full justify-center items-center">
@@ -416,29 +403,6 @@ export default function Home() {
             )
           )}
         </div>
-        {selectedTicket && (
-          <div className="h-full w-1/3 p-small border-l">
-            <Typography variant="h6">Selected Ticket: {selectedTicket.number}</Typography>
-            <Typography variant="subtitle1">Draw Date: {selectedTicket.date}</Typography>
-            <Typography variant="subtitle1">Cost: ${selectedTicket.cost}</Typography>
-            <Typography variant="subtitle1">Available Quantity: {selectedTicket.quantity}</Typography>
-            <div className="flex gap-2 items-center">
-              <IconButton onClick={decrementTickets} disabled={ticketsAddedToCart <= 0}>
-                <RemoveIcon />
-              </IconButton>
-              <Typography>{ticketsAddedToCart}</Typography>
-              <IconButton onClick={incrementTickets} disabled={selectedTicket && ticketsAddedToCart >= selectedTicket.quantity}>
-                <AddIcon />
-              </IconButton>
-            </div>
-            <Button variant="contained" color="primary" fullWidth onClick={addTicketsToCart}>
-              Add to Cart
-            </Button>
-            <Button variant="text" fullWidth onClick={deselectTicket}>
-              Deselect
-            </Button>
-          </div>
-        )}
       </section>
 
 
