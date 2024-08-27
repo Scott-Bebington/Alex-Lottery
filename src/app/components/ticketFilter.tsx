@@ -33,11 +33,28 @@ export default function TicketFilter({
           label={label}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '&:hover fieldset': {
+                borderColor: '#1e293b',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#1e293b',
+              },
+            },
+            '& .MuiInputLabel-root': {
+            color: 'inherit', // Use inherit to keep the default label color
+            '&.Mui-focused': {
+              color: 'inherit', // Change label color to red when focused
+            },
+          },
+          }}
         />
       )}
       onInputChange={(event, newInputValue) => {
         setInputValue(newInputValue);
       }}
     />
+
   );
 }

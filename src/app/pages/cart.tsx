@@ -1,17 +1,32 @@
 "use client";
-import React from 'react';
+import { Typography } from "@mui/material";
+
+import React, { useEffect } from 'react';
+
+import Navbar from '../components/navbar';
+import Footer from '../components/footer';
+
 
 export default function Cart() {
 
-    // Check if the document object is available (i.e., client-side)
-    if (typeof window === 'undefined') {
-        return null; // Render nothing or a fallback component
-    }
+    useEffect(() => {
+        // document.title = "Cart";
+    }, []);
+
 
     return (
-        <div>
-            <h1>Cart Page</h1>
-            <p>Your shopping cart is empty</p>
-        </div>
+        <main className="min-h-screen flex flex-col justify-between">
+            <Navbar />
+            <Typography variant="h3" className="text-center h-12">Your cart</Typography>
+
+
+            <Footer />
+
+
+        </ main>
     );
 }
+
+
+
+
