@@ -4,7 +4,6 @@ import { SnackbarCloseReason } from '@mui/material/Snackbar';
 import { useEffect, useState } from "react";
 import React from 'react';
 
-import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import CustomSnackbar from '../components/snackbar';
 import TicketFilter from '../components/ticketFilter';
@@ -18,7 +17,7 @@ export interface SnackbarMessage {
     status: string;
 }
 
-export default function XmasDraw() {
+export default function KidsDraw() {
     /*
     * Ticket filter state management
     */
@@ -221,9 +220,10 @@ export default function XmasDraw() {
     }, [costInputValue]);
 
     return (
-        <main className="min-h-screen flex flex-col">
-            <Navbar />
-            <Typography variant="h3" className="text-center h-12">Christmas Draw</Typography>
+        // <main className="min-h-screen flex flex-col">
+        <>
+            {/* <Navbar /> */}
+            <Typography variant="h3" className="text-center h-12">Kids Draw</Typography>
             <section className="h-24 gap-4 px-small w-full flex justify-center">
                 <TicketFilter
                     id='ticket_number_input'
@@ -292,7 +292,7 @@ export default function XmasDraw() {
                 </div>
             </section>
 
-            <Footer />
+            {/* <Footer /> */}
 
             <CustomSnackbar
                 snackbarOpen={snackbarOpen}
@@ -303,7 +303,7 @@ export default function XmasDraw() {
                 snackbarKey={messageInfo ? messageInfo.key : 0}
                 status={messageInfo ? messageInfo.status : "success"}
             />
-        </main >
+        </ >
     );
 }
 

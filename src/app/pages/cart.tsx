@@ -1,12 +1,17 @@
 "use client";
 import React from 'react';
-import Navbar from '../components/navbar';
 
 export default function Cart() {
+
+    // Check if the document object is available (i.e., client-side)
+    if (typeof window === 'undefined') {
+        return null; // Render nothing or a fallback component
+    }
+
     return (
-        <div className="h-screen w-full flex justify-center items-center">
-            <Navbar />
-            <h1 className="text-4xl">Cart</h1>
+        <div>
+            <h1>Cart Page</h1>
+            <p>Your shopping cart is empty</p>
         </div>
     );
 }
