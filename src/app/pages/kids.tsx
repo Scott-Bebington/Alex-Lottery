@@ -18,11 +18,23 @@ export interface SnackbarMessage {
     status: string;
 }
 
-export default function KidsDraw() {
+interface KidsDrawProps {
+    tickets: LotteryTicket[];
+    setTickets: (cart: LotteryTicket[]) => void;
+    cart: LotteryTicket[];
+    setCart: (cart: LotteryTicket[]) => void;
+}
+
+export default function KidsDraw({
+    tickets,
+    setTickets,
+    cart,
+    setCart
+}: KidsDrawProps) {
     /*
     * Ticket filter state management
     */
-    const [tickets, setTickets] = useState<LotteryTicket[]>([]);
+    // const [tickets, setTickets] = useState<LotteryTicket[]>([]);
     const [filteredTickets, setFilteredTickets] = useState<LotteryTicket[]>([]);
     const [ticketsLoaded, setTicketsLoaded] = useState<boolean>(false);
     const [ticketNumberInputValue, setTicketNumberInput] = useState<string>('');

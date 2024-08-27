@@ -31,7 +31,6 @@ export default function Ticket(
   return (
     <div
       className='bg-white rounded shadow-sm'
-      key={ticket.number}
     >
       <CardMedia
         component="img"
