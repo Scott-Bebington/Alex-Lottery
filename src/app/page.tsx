@@ -1,47 +1,192 @@
+// "use client";
+// import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+
+// import Xmas from './pages/xmas';
+// import Kids from './pages/kids';
+// import Cart from './pages/cart';
+// import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+// import LotteryTicket from './classes/lotteryTicket';
+
+// import cong from "./firebaseConfig";
+// import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+// import { getDatabase, ref, onValue } from "firebase/database";
+
+// export default function Home() {
+//   const [isClient, setIsClient] = useState<boolean>(false);
+//   const [xmasTickets, setXmasTickets] = useState<LotteryTicket[]>([]);
+//   const [kidsTickets, setKidsTickets] = useState<LotteryTicket[]>([]);
+//   const [cart, setCart] = useState<LotteryTicket[]>([]);
+//   const ticketsfetched = useRef<boolean>(false);
+
+//   /*
+//   * Fetching tickets from the server
+//   */
+//   useEffect(() => {
+//     if (ticketsfetched.current === false) {
+//       console.log("Fetching tickets from Firestore database");
+//       const firestore = getFirestore(cong);
+//       const XmasDrawCollection = collection(firestore, "Xmas_Draw");
+
+//       const fetchXmasData = () => {
+//         onSnapshot(XmasDrawCollection, (snapshot) => {
+//           const data = snapshot.docs.map((doc) => doc.data());
+
+//           const tickets: LotteryTicket[] = [];
+
+//           if (data) {
+//             for (const ticket of data) {
+//               // console.log(ticket);
+//               console.log(ticket.ticketNum);
+//               // console.log(new Date(ticket.drawDate).toLocaleDateString('en-GB')); // format as "dd-mm-yyyy"
+//               console.log(ticket.quantity);
+//               console.log(ticket.cost);
+//               console.log(ticket.image);
+
+//               const drawDate: Date = ticket.drawDate.toDate();
+//               const formattedDate = drawDate.getDay() + "-" + drawDate.getMonth() + "-" + drawDate.getFullYear();
+
+//               tickets.push(new LotteryTicket(ticket.ticketNum, formattedDate, ticket.cost, "Xmas Draw", ticket.quantity, ticket.image));
+//             }
+
+//             setXmasTickets(tickets);
+//           }
+//         });
+//       };
+
+//       fetchXmasData();
+
+//       return () => {
+//         ticketsfetched.current = true
+//       }
+
+//     }
+//   }, []);
+
+//   /*
+//   * Check if the component is mounted on the client side
+//   */
+//   useEffect(() => {
+//     setIsClient(true);
+//   }, []);
+
+//   if (!isClient) {
+//     return null; // Render nothing until client-side rendering
+//   }
+
+
+//   return (
+//     <Router>
+//       <Routes>
+//         <Route
+//           path="/"
+//           element={
+//             <Xmas
+//               tickets={xmasTickets}
+//               setTickets={setXmasTickets}
+//               cart={cart}
+//               setCart={setCart}
+//             />
+//           }
+//         />
+//         <Route
+//           path="/kids"
+//           element={
+//             <Kids
+//               tickets={kidsTickets}
+//               setTickets={setKidsTickets}
+//               cart={cart}
+//               setCart={setCart}
+//             />
+//           }
+//         />
+//         <Route
+//           path="/cart"
+//           element={
+//             <Cart
+//               cart={cart}
+//               setCart={setCart}
+//             />
+//           }
+//         />
+//       </Routes>
+//     </Router>
+//   );
+// }
+
 "use client";
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { StrictMode, useEffect, useState } from 'react'
+import ReactDOM from 'react-dom/client'
+import {
+  Outlet,
+  RouterProvider,
+  Link,
+  createRouter,
+  createRoute,
+  createRootRoute,
+} from '@tanstack/react-router'
+import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
+const rootRoute = createRootRoute({
+  component: () => (
+    <>
+      <div className="p-2 flex gap-2">
+        <Link to="/" className="[&.active]:font-bold">
+          Home
+        </Link>{' '}
+        <Link to="/about" className="[&.active]:font-bold">
+          About
+        </Link>
+      </div>
+      <hr />
+      <Outlet />
+      <TanStackRouterDevtools />
+    </>
+  ),
+})
 
-import Xmas from './pages/xmas';
-import Kids from './pages/kids';
-import Cart from './pages/cart';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import LotteryTicket from './classes/lotteryTicket';
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: function Index() {
+    return (
+      <div className="p-2">
+        <h3>Welcome Home!</h3>
+      </div>
+    )
+  },
+})
+
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: function About() {
+    return <div className="p-2">Hello from About!</div>
+  },
+})
+
+const routeTree = rootRoute.addChildren([indexRoute, aboutRoute])
+
+const router = createRouter({ routeTree })
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
+
+// const rootElement = document.getElementById('app')!
+// if (!rootElement.innerHTML) {
+//   const root = ReactDOM.createRoot(rootElement)
+//   root.render(
+//     <StrictMode>
+//       <RouterProvider router={router} />
+//     </StrictMode>,
+//   )
+// }
 
 export default function Home() {
   const [isClient, setIsClient] = useState<boolean>(false);
-  const [xmasTickets, setXmasTickets] = useState<LotteryTicket[]>([]);
-  const [kidsTickets, setKidsTickets] = useState<LotteryTicket[]>([]);
-  const [cart, setCart] = useState<LotteryTicket[]>([]);
-
-  const tickets: LotteryTicket[] = [
-    new LotteryTicket(43840, "2024-09-05", 5, "Powerball", 2, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(52341, "2024-09-12", 10, "Mega Millions", 1, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(78903, "2024-09-19", 15, "Powerball", 4, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(48203, "2024-09-26", 20, "EuroMillions", 3, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(31456, "2024-10-03", 7, "Powerball", 5, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(60234, "2024-10-10", 8, "Mega Millions", 6, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(15678, "2024-10-17", 9, "EuroMillions", 2, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(89432, "2024-10-24", 12, "Powerball", 3, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(34781, "2024-10-31", 6, "Mega Millions", 7, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(62894, "2024-11-07", 14, "EuroMillions", 4, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(74829, "2024-11-14", 11, "Powerball", 1, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(23485, "2024-11-21", 13, "Mega Millions", 5, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(54932, "2024-11-28", 16, "EuroMillions", 6, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(67290, "2024-12-05", 18, "Powerball", 4, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(85423, "2024-12-12", 7, "Mega Millions", 2, "/images/tickets/ticket_example.png"),
-    new LotteryTicket(12345, "2024-12-19", 5, "EuroMillions", 3, "/images/tickets/ticket_example.png"),
-  ]
-
-  /*
-  * Fetching tickets from the server
-  */
-  useEffect(() => {
-    setTimeout(() => {
-      setXmasTickets(tickets);
-      setKidsTickets(tickets);
-    }, 2000);
-  }, []);
 
   /*
   * Check if the component is mounted on the client side
@@ -53,41 +198,11 @@ export default function Home() {
   if (!isClient) {
     return null; // Render nothing until client-side rendering
   }
+  
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Xmas
-              tickets={xmasTickets}
-              setTickets={setXmasTickets}
-              cart={cart}
-              setCart={setCart}
-            />
-          }
-        />
-        <Route
-          path="/kids"
-          element={
-            <Kids
-              tickets={kidsTickets}
-              setTickets={setKidsTickets}
-              cart={cart}
-              setCart={setCart}
-            />
-          }
-        />
-        <Route
-          path="/cart"
-          element={
-            <Cart
-              cart={cart}
-              setCart={setCart}
-            />
-          }
-        />
-      </Routes>
-    </Router>
-  );
+    <>
+      <RouterProvider router={router} />
+    </>
+  )
 }
+
