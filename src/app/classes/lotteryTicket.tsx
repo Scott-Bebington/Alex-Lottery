@@ -13,6 +13,7 @@ class LotteryTicket {
   type: string;
   quantity: number;
   image: string | undefined; // Optional type for image, as it may not always be provided
+  ticketID: string;
 
   constructor(
     number: number,
@@ -20,7 +21,9 @@ class LotteryTicket {
     cost: number,
     type: string,
     quantity: number,
+    ticketID: string,
     image?: string // Optional parameter
+
   ) {
     this.number = number;
     this.date = date;
@@ -28,6 +31,7 @@ class LotteryTicket {
     this.type = type;
     this.quantity = quantity;
     this.image = image;
+    this.ticketID = ticketID;
   }
 }
 

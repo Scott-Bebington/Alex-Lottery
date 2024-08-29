@@ -5,6 +5,7 @@ import { Button, CardActions, CardContent, CardMedia, Collapse, IconButton, Typo
 import React from 'react';
 
 import LotteryTicket from '../classes/lotteryTicket';
+import ActionButton from './actionButton';
 
 interface TicketProps {
   ticket: LotteryTicket;
@@ -94,21 +95,28 @@ export default function Ticket(
 
           </section>
           <section className="flex justify-between gap-4 mt-small">
-            <Button
-              className="mt-small rounded p-small flex-1"
+            <ActionButton
               onClick={() => handleExpandClick(ticket.number)}
-              sx={{ border: '1px solid #1e293b', backgroundColor: 'white', color: '#1e293b', ':hover': { backgroundColor: '#1e293b', color: 'white' } }}
-            >
-              Close
-            </Button>
+              staticText="Close"
+              loadingText="Closing"
+              backgroundColour='white'
+              colour='#1e293b'
+              hoverBackgroundColour='#1e293b'
+              hoverColour='white'
+              border='#1e293b'
+            />
 
-            <Button
-              className="mt-small rounded p-small flex-1"
+            <ActionButton
               onClick={() => addTicketsToCart()}
-              sx={{ border: '1px solid', backgroundColor: '#1e293b', color: 'white', ':hover': { backgroundColor: 'white', color: '#1e293b' } }}
-            >
-              Add to cart
-            </Button>
+              staticText="Add to cart"
+              loadingText="Adding to cart"
+              backgroundColour='#1e293b'
+              colour='white'
+              hoverBackgroundColour='white'
+              hoverColour='#1e293b'
+              border='#1e293b'
+            />
+
 
           </section>
         </Collapse>
