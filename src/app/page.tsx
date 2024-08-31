@@ -13,11 +13,43 @@ import { getFirestore, collection, onSnapshot } from "firebase/firestore";
 import { getDatabase, ref, onValue } from "firebase/database";
 
 import { getAllXmasTickets } from "./functions/xmas_functions";
+import { getCart } from './functions/cart_functions';
 
 export default function Home() {
   const [isClient, setIsClient] = useState<boolean>(false);
+
+
+  const [xmasTickets, setXmasTickets] = useState<LotteryTicket[]>([]);
+  const [xmasFilteredTickets, setXmasFilteredTickets] = useState<LotteryTicket[]>([]);
+  const [xmasTicketsLoaded, setXmasTicketsLoaded] = useState<boolean>(false);
+
+
+
   const [kidsTickets, setKidsTickets] = useState<LotteryTicket[]>([]);
+  const [kidsFilteredTickets, setKidsFilteredTickets] = useState<LotteryTicket[]>([]);
+  const [kidsTicketsLoaded, setKidsTicketsLoaded] = useState<boolean>(false);
+
+
   const [cart, setCart] = useState<LotteryTicket[]>([]);
+  const [cartLoaded, setCartLoaded] = useState<boolean>(false);
+  const initialRender = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (initialRender.current === false) {
+
+      const getAllData = async () => {
+        await getAllXmasTickets(setXmasTickets, setXmasTicketsLoaded, setXmasFilteredTickets);
+        // Get kids tickets
+        await getCart(setCart, setCartLoaded);
+      }
+
+      getAllData();
+
+      return () => {
+        initialRender.current = true;
+      };
+    }
+  }, []);
 
   /*
   * Check if the component is mounted on the client side
@@ -37,11 +69,18 @@ export default function Home() {
         <Route
           path="/"
           element={
-            <Xmas
-              // tickets={xmasTickets}
-              // setTickets={setXmasTickets}
+            // <Xmas
+            //   xmasTickets={xmasTickets}
+            //   filteredTickets={xmasFilteredTickets}
+            //   setFilteredTickets={setXmasFilteredTickets}
+            //   ticketsLoaded={xmasTicketsLoaded}
+            //   cart={cart}
+            //   setCart={setCart}
+            // />
+            <Cart 
               cart={cart}
               setCart={setCart}
+              cartLoaded={cartLoaded}
             />
           }
         />
@@ -59,9 +98,10 @@ export default function Home() {
         <Route
           path="/cart"
           element={
-            <Cart
+            <Cart 
               cart={cart}
               setCart={setCart}
+              cartLoaded={cartLoaded}
             />
           }
         />

@@ -38,7 +38,7 @@ export default function Ticket(
         height="140"
         image={ticket.image}
         alt="Lottery ticket image"
-        className='rounded'
+        className='rounded px-small pt-small'
       />
       <CardContent>
         <section className='flex items-center justify-between'>

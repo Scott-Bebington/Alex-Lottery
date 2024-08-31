@@ -22,12 +22,20 @@ interface SnackbarMessage {
 }
 
 interface XmasDrawProps {
+  xmasTickets: LotteryTicket[];
+  filteredTickets: LotteryTicket[];
+  setFilteredTickets: (tickets: LotteryTicket[]) => void;
+  ticketsLoaded: boolean;
   cart: LotteryTicket[];
   setCart: (cart: LotteryTicket[]) => void;
 }
 
 export default function XmasDraw(
   {
+    xmasTickets,
+    filteredTickets,
+    setFilteredTickets,
+    ticketsLoaded,
     cart,
     setCart
   }: XmasDrawProps
@@ -35,16 +43,15 @@ export default function XmasDraw(
   /*
   * Ticket filter state management
   */
-  const [xmasTickets, setXmasTickets] = useState<LotteryTicket[]>([]);
-  const [filteredTickets, setFilteredTickets] = useState<LotteryTicket[]>([]);
-  const [ticketsLoaded, setTicketsLoaded] = useState<boolean>(false);
+  // const [xmasTickets, setXmasTickets] = useState<LotteryTicket[]>([]);
+  // const [filteredTickets, setFilteredTickets] = useState<LotteryTicket[]>([]);
+  // const [ticketsLoaded, setTicketsLoaded] = useState<boolean>(false);
   const [ticketNumberInputValue, setTicketNumberInput] = useState<string>('');
   const [drawDateInputValue, setDrawDateInputValue] = useState<string>('');
   const [costInputValue, setCostInputValue] = useState<string>('');
   const filterByDate = (ticket: LotteryTicket) => ticket.date.toString();
   const filterByNumber = (ticket: LotteryTicket) => ticket.number.toString();
   const filterByCost = (ticket: LotteryTicket) => ticket.cost.toString();
-  const initialRender = useRef<boolean>(false);
 
   /*
   * Selected ticket state management
@@ -110,19 +117,6 @@ export default function XmasDraw(
     setMessageInfo(undefined);
   };
 
-  // /*
-  // * Fetching tickets from the server
-  // */
-  useEffect(() => {
-    if (initialRender.current === false) {
-      getAllXmasTickets(setXmasTickets, setTicketsLoaded, setFilteredTickets);
-      return () => {
-        initialRender.current = true
-      }
-
-    }
-  }, []);
-
   /*
   * Ticket adding functions
   */
@@ -156,55 +150,33 @@ export default function XmasDraw(
       return;
     }
 
-    // FUTURE CHECK IF THE USER IS LOGGED IN
-
-    // Create a new ticket object with the selected ticket details
-    const ticket = new LotteryTicket(selectedTicket.number, selectedTicket.date, selectedTicket.cost, "Xmas", ticketsAddedToCart, selectedTicket.ticketID, selectedTicket.image);
-
     // Add tickets to cart
     try {
+      await addToCart(
+        selectedTicket,
+        ticketsAddedToCart,
+        cart,
+        setCart,
+        "Xmas_Draw"
+      );
 
-      // Add the ticket to the cart
-      await addToCart(selectedTicket);
-
-      // If A card with the same ticketID is already in the cart, add the new tickets to the existing card
-      const existingTicket = cart.find(ticket => ticket.ticketID === selectedTicket.ticketID);
-      if (existingTicket) {
-        existingTicket.quantity += ticketsAddedToCart;
-        setCart([...cart]);
-      } else {
-        setCart([...cart, ticket]);
-      }
-    } catch (error) {
-      openSnackbar = handleSnackbarOpen("Error adding tickets to cart", "error");
-      openSnackbar();
-      return;
-    }
-
-    // Update ticket quantity in the database
-    try {
-      selectedTicket.quantity -= ticketsAddedToCart;
-
-      await updateXmasTicketQuantity(selectedTicket.ticketID, selectedTicket.quantity);
-
-    } catch (error) {
-
-      // Attempt to remove the ticket from the cart if the quantity update fails
-      try {
-        await removeFromCart(selectedTicket);
-
-        const existingTicket = cart.find(ticket => ticket.ticketID === selectedTicket.ticketID);
-        if (existingTicket) {
-          existingTicket.quantity -= ticketsAddedToCart;
-          setCart([...cart]);
-        } else {
-          const newCart = cart.filter(ticket => ticket.ticketID !== selectedTicket.ticketID);
-          setCart(newCart);
-        }
-      } catch (error) {
-        openSnackbar = handleSnackbarOpen("Error adding tickets to cart", "error");
+    } catch (error: Error | any) {
+      console.error(error.message);
+      if (error.message === "User is not logged in") {
+        openSnackbar = handleSnackbarOpen("Please log in before adding items to cart", "warning");
         openSnackbar();
-        console.error("Error removing ticket from cart, contact developer!!!!!!!", error);
+        return;
+      } else if (error.message === "No ticket selected") {
+        openSnackbar = handleSnackbarOpen("No ticket selected", "error");
+        openSnackbar();
+        return;
+      } else if (error.message === "No tickets added to cart") {
+        openSnackbar = handleSnackbarOpen("No tickets added to cart", "error");
+        openSnackbar();
+        return;
+      } else if (error.message === "Ticket not found in the database") {
+        openSnackbar = handleSnackbarOpen("This ticket has been sold out", "error");
+        openSnackbar();
         return;
       }
 

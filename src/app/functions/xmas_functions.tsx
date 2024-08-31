@@ -10,6 +10,8 @@ const firestore = getFirestore(app);
 // Function to get all tickets from the Xmas_Draw collection
 export async function getAllXmasTickets(setXmasTickets: (tickets: LotteryTicket[]) => void, setTicketsFetched: (fetched: boolean) => void, setFilteredTickets: (tickets: LotteryTicket[]) => void) {
     
+    // console.log("Getting Xmas tickets in function 'getAllXmasTickets'");
+
     const XmasDrawCollection = collection(firestore, "Xmas_Draw");
 
     onSnapshot(XmasDrawCollection, (snapshot) => {
@@ -27,7 +29,7 @@ export async function getAllXmasTickets(setXmasTickets: (tickets: LotteryTicket[
 
             tickets.push(new LotteryTicket(ticket.ticketNum, formattedDate, ticket.cost, "Xmas Draw", ticket.quantity, ticketID, ticket.image));
         }
-        console.log("Xmas tickets have been fetched");
+        // console.log("Xmas tickets have been fetched");
         setXmasTickets(tickets);
         setFilteredTickets(tickets);
         setTicketsFetched(true);

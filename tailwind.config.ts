@@ -26,14 +26,14 @@ const config: Config = {
         },
       },
       margin: {
-        'small': '10px',  
-        'medium': '25px',
-        'large': '50px',
+        'small': '0.75rem',  
+        'medium': '1.5rem',
+        'large': '2.5rem',
       },
       padding: {
-        'small': '10px',
-        'medium': '25px',
-        'large': '50px',
+        'small': '0.75rem',  
+        'medium': '1.5rem',
+        'large': '2.5rem',
       },
     },
     fontSize: {
