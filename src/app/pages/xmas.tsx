@@ -152,6 +152,23 @@ export default function XmasDraw(
 
     // Add tickets to cart
     try {
+
+      console.log('------------ADDING TO CART FROM XMAS DRAW------------');
+
+      console.log('Selected ticket Data: ');
+      console.log("Cost: ", selectedTicket.cost);
+      console.log("Date: ", selectedTicket.date);
+      console.log("Number: ", selectedTicket.number);
+      console.log("Quantity: ", selectedTicket.quantity);
+      console.log("Ticket ID: ", selectedTicket.ticketID);
+      console.log("Image: ", selectedTicket.image);
+      console.log("Type: ", selectedTicket.type);
+
+      console.log('Tickets Added to Cart: ');
+      console.log("Tickets Added: ", ticketsAddedToCart);
+
+
+
       await addToCart(
         selectedTicket,
         ticketsAddedToCart,
@@ -159,6 +176,8 @@ export default function XmasDraw(
         setCart,
         "Xmas_Draw"
       );
+
+      console.log('------------ADDING TO CART FROM XMAS DRAW------------');
 
     } catch (error: Error | any) {
       console.error(error.message);

@@ -98,10 +98,13 @@ export default function Home() {
         <Route
           path="/cart"
           element={
-            <Cart 
+            <Xmas
+              xmasTickets={xmasTickets}
+              filteredTickets={xmasFilteredTickets}
+              setFilteredTickets={setXmasFilteredTickets}
+              ticketsLoaded={xmasTicketsLoaded}
               cart={cart}
               setCart={setCart}
-              cartLoaded={cartLoaded}
             />
           }
         />

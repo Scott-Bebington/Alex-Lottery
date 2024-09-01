@@ -71,7 +71,12 @@ export default function Cart({
               <Typography variant="h5" className="text-center">Your cart is empty</Typography>
             ) : (
               cart.map((ticket: LotteryTicket) => (
-                  <CartItem key={ticket.number} ticket={ticket} setCart={setCart} />
+                <CartItem
+                  key={ticket.number}
+                  ticket={ticket}
+                  cart={cart}
+                  setCart={setCart}
+                />
 
               ))
             )

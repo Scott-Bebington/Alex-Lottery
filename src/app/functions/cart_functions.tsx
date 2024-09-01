@@ -67,7 +67,7 @@ export async function getTicket(ticketID: string, ticketType: string, setTickets
     const ticketData = snapshot.data();
 
     setTicketsLeft(ticketData?.quantity);
-    
+
   });
 }
 
@@ -89,6 +89,7 @@ export async function addToCart(
   setCart: (cart: LotteryTicket[]) => void,
   ticketType: string) {
 
+  console.log('----------------------ADD TICKET TO CART-------------------');
 
   // CHECK TO SEE IF THE USER IS LOGGED IN
   // if (auth.currentUser === null) {
@@ -103,7 +104,15 @@ export async function addToCart(
     throw new Error("No tickets added to cart");
   }
 
-  const ticket = new LotteryTicket(selectedTicket.number, selectedTicket.date, selectedTicket.cost, ticketType, ticketsAddedToCart, selectedTicket.ticketID, selectedTicket.image);
+  const ticket = new LotteryTicket(
+    selectedTicket.number,
+    selectedTicket.date,
+    selectedTicket.cost,
+    ticketType,
+    ticketsAddedToCart,
+    selectedTicket.ticketID,
+    selectedTicket.image
+  );
 
   const existingTicket = cart.find(ticket => ticket.ticketID === selectedTicket.ticketID);
   if (existingTicket) {
@@ -116,6 +125,7 @@ export async function addToCart(
   // Do error checking to make sure there is a ticket in the db before adding to cart(check being done for redundancy)
   const ticketDetails = doc(collection(firestore, ticketType), selectedTicket.ticketID);
 
+  // Check to see if the ticket exists in the database
   const ticketSnapshot = await getDoc(ticketDetails);
   if (!ticketSnapshot.exists()) {
     throw new Error("Ticket not found in the database");
@@ -152,6 +162,9 @@ export async function addToCart(
   // Update the quantity of the ticket in the database
   try {
     const newQuantity = selectedTicket.quantity - ticketsAddedToCart;
+    console.log("Selected ticket quantity: ", selectedTicket.quantity);
+    console.log("Tickets added to cart: ", ticketsAddedToCart);
+    console.log('New quantity for the ticket in the xmas collection: ', newQuantity);
     updateXmasTicketQuantity(selectedTicket.ticketID, newQuantity);
   } catch (error) {
     try {
@@ -170,20 +183,50 @@ export async function addToCart(
     }
   }
 
-
-
+  console.log('----------------------ADD TICKET TO CART-------------------');
 }
 
-export async function updateTicketInCart(ticket: LotteryTicket, newQuantity: number) {
-  const user = collection(firestore, "users");
-  const userDoc = doc(user, "INiMgoj9TCetIOyUKcX4bYNo2va2");
-  const userCart = collection(userDoc, "Cart");
+export async function updateTicketInCart(
+  ticket: LotteryTicket,
+  newQuantity: number,
+  cart: LotteryTicket[],
+  setCart: (cart: LotteryTicket[]) => void) {
 
-  const ticketRef = doc(userCart, ticket.ticketID);
+  // const user = collection(firestore, "users");
+  // const userDoc = doc(user, "INiMgoj9TCetIOyUKcX4bYNo2va2");
+  // const userCart = collection(userDoc, "Cart");
 
-  await updateDoc(ticketRef, {
-    quantity: newQuantity
-  });
+  // const ticketRef = doc(userCart, ticket.ticketID);
+
+  // await updateDoc(ticketRef, {
+  //   quantity: newQuantity
+  // });
+
+  // If the newQuantity is greater than the ticket quantity, attempt to add more tickets from the database into the cart
+  if (newQuantity > 0) {
+
+    console.log('----------------------UPDATE TICKET IN CART-------------------');
+
+    console.log('New Quantity: ', newQuantity);
+    console.log('Ticket type: ', ticket.type);
+    console.log('Ticket quantity: ', ticket.quantity);
+
+    const newTicket: LotteryTicket = new LotteryTicket(
+      ticket.number,
+      ticket.date,
+      ticket.cost,
+      ticket.type,
+      ticket.quantity - newQuantity,
+      ticket.ticketID,
+      ticket.image
+    );
+
+    await addToCart(newTicket, newQuantity, cart, setCart, ticket.type);
+    console.log('Ticket added to cart');
+
+    console.log('----------------------UPDATE TICKET IN CART-------------------');
+  }
+
 }
 
 export async function removeFromCart(ticket: LotteryTicket) {
