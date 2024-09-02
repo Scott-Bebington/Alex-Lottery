@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import LotteryTicket from './classes/lotteryTicket';
@@ -15,6 +15,11 @@ import CustomSnackbar from './components/snackbar';
 import { SnackbarMessage } from './interfaces/interfaces';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Login from './pages/login';
+import { initializeApp } from 'firebase/app';
+import firebaseConfig from './firebaseConfig';
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 export default function Home() {
   const [isClient, setIsClient] = useState<boolean>(false);
@@ -61,18 +66,46 @@ export default function Home() {
   useEffect(() => {
     if (initialRender.current === false) {
 
-      const getAllData = async () => {
-        await getAllXmasTickets(setXmasTickets, setXmasTicketsLoaded, setXmasFilteredTickets);
-        await getCart(setCart, setCartLoaded);
+      try {
+        const getAllData = async () => {
+          await getAllXmasTickets(setXmasTickets, setXmasTicketsLoaded, setXmasFilteredTickets);
+          // await getCart(setCart, setCartLoaded);
+        }
+
+        getAllData();
+
+        return () => {
+          initialRender.current = true;
+        };
+      } catch (error: Error | any) {
+        console.error(error.message);
       }
-
-      getAllData();
-
-      return () => {
-        initialRender.current = true;
-      };
     }
   }, []);
+
+  useEffect(() => {
+
+    if (!auth.currentUser) {
+      return;
+    }
+
+    try {
+      const getAllData = async () => {
+        await getCart(setCart, setCartLoaded);
+      }
+      getAllData();
+    } catch (error: Error | any) {
+      if (error.message === "User is not logged in") {
+        console.error("User is not logged in");
+        return;
+      }
+
+      console.error(error.message);
+    }
+
+
+
+  }, [auth.currentUser]);
 
   /*
   * Snackbar functions

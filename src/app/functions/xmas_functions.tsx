@@ -34,11 +34,3 @@ export async function getAllXmasTickets(setXmasTickets: (tickets: LotteryTicket[
         setTicketsFetched(true);
     });
 }
-
-// Function to update the quantity of a certain ticket
-export async function updateXmasTicketQuantity(ticketID: string, newQuantity: number) {
-    const ticketRef = doc(firestore, "Xmas_Draw", ticketID);
-    await updateDoc(ticketRef, {
-        quantity: newQuantity
-    });
-}

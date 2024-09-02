@@ -46,7 +46,7 @@ export default function Cart({
       window.localStorage.setItem('redirectAfterLogin', window.location.pathname);
       navigate("/login"); // Redirect to the login page
     }
-  }, []);
+  }, [auth.currentUser]);
 
   function calculateTotal() {
     let total = 0;

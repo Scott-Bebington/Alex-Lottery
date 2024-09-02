@@ -88,7 +88,12 @@ export default function Login({
     try {
       setLoginText('Logging in...');
       await firebaseSignInWithEmailAndPassword(auth, email, password);
-      // Handle successful sign-in (e.g., navigate to the Cart page or show a success message)
+      var redirectPath = window.localStorage.getItem('redirectAfterLogin') || '/';
+      window.localStorage.removeItem('redirectAfterLogin');
+      if (redirectPath === '/login') {
+        redirectPath = '/';
+      }
+      navigate(redirectPath);
     } catch (error: Error | any) {
       let errorMessage: SnackbarMessage = checkLoginError(error.message);
       let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
@@ -106,19 +111,24 @@ export default function Login({
       let openSnackbar = handleSnackbarOpen('You have been signed in with Google', 'success');
       openSnackbar();
 
-      const redirectPath = window.localStorage.getItem('redirectAfterLogin') || '/';
+      var redirectPath = window.localStorage.getItem('redirectAfterLogin') || '/';
       window.localStorage.removeItem('redirectAfterLogin');
+      if (redirectPath === '/login') {
+        redirectPath = '/';
+      }
       navigate(redirectPath);
     } catch (error: Error | any) {
+
+      if (error.code === 'Firebase: Error (auth/cancelled-popup-request).') {
+        console.log('Popup request cancelled');
+        return;
+      }
+
       let errorMessage: SnackbarMessage = checkLoginError(error.message);
       let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
       openSnackbar();
       return;
     }
-
-
-
-
   };
 
   const signOut = async () => {

@@ -22,12 +22,12 @@ export async function getCart(
   setCartLoaded: (loaded: boolean) => void
 ) {
 
-  // if (auth.currentUser === null) {
-  //     throw new Error("User is not logged in");
-  // }
+  if (auth.currentUser === null) {
+    throw new Error("User is not logged in");
+  }
 
   const users = collection(firestore, "users");
-  const user = doc(users, "INiMgoj9TCetIOyUKcX4bYNo2va2");
+  const user = doc(users, auth.currentUser.uid);
 
   const cart = collection(user, "Cart");
 
@@ -84,9 +84,11 @@ export async function getTicket(ticketID: string, ticketType: string, setTickets
 export async function addToCart(inTicket: LotteryTicket, ticketsAdded: number) {
 
   // Check if the user is logged in
-  // if (auth.currentUser === null) {
-  //     throw new Error("User is not logged in");
-  // }
+  if (auth.currentUser === null) {
+    throw new Error("User is not logged in");
+  }
+
+  const userUID = auth.currentUser.uid;
 
   // Check to see if the ticket is not null or empty
   if (!inTicket || inTicket.ticketID === "") {
@@ -127,8 +129,9 @@ export async function addToCart(inTicket: LotteryTicket, ticketsAdded: number) {
       throw new Error("Not enough tickets in stock");
     }
 
-    // Check to see if the ticket is already in the cart
-    const cartRef = doc(collection(firestore, "users", "INiMgoj9TCetIOyUKcX4bYNo2va2", "Cart"), inTicket.ticketID);
+    // Reference to the Cart collection within the user's document
+    const cartCollectionRef = collection(firestore, "users", userUID, "Cart");
+    const cartRef = doc(cartCollectionRef, inTicket.ticketID);
     const cartDoc = await transaction.get(cartRef);
 
     // Check if the ticket is already in the cart
@@ -151,15 +154,16 @@ export async function addToCart(inTicket: LotteryTicket, ticketsAdded: number) {
     const newQuantity = ticketData.quantity - ticketsAdded;
     transaction.update(ticketRef, { quantity: newQuantity });
   });
-
 }
 
 export async function removeFromCart(inTicket: LotteryTicket, ticketsRemoved: number) {
 
   // Check if the user is logged in
-  // if (auth.currentUser === null) {
-  //     throw new Error("User is not logged in");
-  // }
+  if (auth.currentUser === null) {
+      throw new Error("User is not logged in");
+  }
+
+  const userUID = auth.currentUser.uid;
 
   // Check to see if the ticket is not null or empty
   if (!inTicket || inTicket.ticketID === "") {
@@ -179,7 +183,7 @@ export async function removeFromCart(inTicket: LotteryTicket, ticketsRemoved: nu
   await runTransaction(firestore, async (transaction) => {
 
     // Get the cart document
-    const cartRef = doc(collection(firestore, "users", "INiMgoj9TCetIOyUKcX4bYNo2va2", "Cart"), inTicket.ticketID);
+    const cartRef = doc(collection(firestore, "users", userUID, "Cart"), inTicket.ticketID);
     const cartDoc = await transaction.get(cartRef);
 
     // Check if the ticket exists in the cart

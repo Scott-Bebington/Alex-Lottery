@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import firebaseConfig from '../firebaseConfig';
 import { Button } from "@mui/material";
 
@@ -12,15 +12,18 @@ const auth = getAuth(app);
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // console.log('User is already logged in');
-        // console.log('Name: ', user.displayName);
         setUser(user);
       } else {
-        console.log('No user is logged in');
-        setUser(null);
+        // Get the current path and store it in local storage
+        window.localStorage.setItem('currentPath', window.location.pathname);
+        if (window.location.pathname === "/cart") {
+          navigate("/login");
+        }
       }
     });
 
