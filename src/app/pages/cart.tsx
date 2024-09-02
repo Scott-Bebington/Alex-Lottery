@@ -1,13 +1,11 @@
 "use client";
-import { CardActionArea, CardContent, Skeleton, SnackbarCloseReason, Typography } from "@mui/material";
+import { CardActionArea, CardContent, Skeleton, Typography } from "@mui/material";
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
 import LotteryTicket from "../classes/lotteryTicket";
-import { getCart } from "../functions/cart_functions";
 import CartItem from "../components/cartItem";
+import Footer from '../components/footer';
+import Navbar from '../components/navbar';
 
 import { CartProps } from '../interfaces/interfaces';
 

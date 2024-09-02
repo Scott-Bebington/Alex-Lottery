@@ -1,20 +1,17 @@
 "use client";
 import { CardActionArea, CardContent, Skeleton, Typography } from "@mui/material";
-import { SnackbarCloseReason } from '@mui/material/Snackbar';
-import { useEffect, useRef, useState } from "react";
-import React from 'react';
+import { useEffect, useState } from "react";
 
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
-import CustomSnackbar from '../components/snackbar';
-import TicketFilter from '../components/ticketFilter';
 import LotteryTicket from '../classes/lotteryTicket';
+import Footer from '../components/footer';
+import Navbar from '../components/navbar';
 import Ticket from '../components/ticket';
+import TicketFilter from '../components/ticketFilter';
 
 import { addToCart } from "../functions/cart_functions";
 
-import { SnackbarMessage, XmasDrawProps } from '../interfaces/interfaces';
 import { checkErrorMessage } from "../functions/errorChecking";
+import { SnackbarMessage, XmasDrawProps } from '../interfaces/interfaces';
 
 export default function XmasDraw(
   {
@@ -242,15 +239,7 @@ export default function XmasDraw(
 
       <Footer />
 
-      <CustomSnackbar
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        handleSnackbarClose={handleSnackbarClose}
-        handleSnackbarExited={handleSnackbarExited}
-        message={messageInfo ? messageInfo.message : ""}
-        snackbarKey={messageInfo ? messageInfo.key : 0}
-        status={messageInfo ? messageInfo.status : "success"}
-      />
+      
     </main >
   );
 }

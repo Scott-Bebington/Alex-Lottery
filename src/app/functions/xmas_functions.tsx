@@ -1,7 +1,6 @@
 import firebaseConfig from "@/app/firebaseConfig";
-import { getFirestore, collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
-import { getDatabase, ref, onValue } from "firebase/database";
 import { initializeApp } from "firebase/app";
+import { collection, doc, getFirestore, onSnapshot, updateDoc } from "firebase/firestore";
 import LotteryTicket from "../classes/lotteryTicket";
 
 const app = initializeApp(firebaseConfig);

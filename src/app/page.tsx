@@ -1,21 +1,17 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-
-import Xmas from './pages/xmas';
-import Kids from './pages/kids';
-import Cart from './pages/cart';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import LotteryTicket from './classes/lotteryTicket';
+import Cart from './pages/cart';
+import Kids from './pages/kids';
+import Xmas from './pages/xmas';
 
-import cong from "./firebaseConfig";
-import { getFirestore, collection, onSnapshot } from "firebase/firestore";
-import { getDatabase, ref, onValue } from "firebase/database";
-
-import { getAllXmasTickets } from "./functions/xmas_functions";
-import { getCart } from './functions/cart_functions';
 import { SnackbarCloseReason } from '@mui/material';
+import { getCart } from './functions/cart_functions';
+import { getAllXmasTickets } from "./functions/xmas_functions";
 
+import CustomSnackbar from './components/snackbar';
 import { SnackbarMessage } from './interfaces/interfaces';
 
 export default function Home() {
@@ -88,6 +84,7 @@ export default function Home() {
   }, [snackPack, messageInfo, snackbarOpen]);
 
   const handleSnackbarOpen = (message: string, status: string) => () => {
+    console.log("Snackbar open");
     setSnackPack((prev) => [...prev, { message, key: new Date().getTime(), status: status }]);
   };
 
@@ -133,45 +130,57 @@ export default function Home() {
   };
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Xmas
-              xmasTickets={xmasTickets}
-              filteredTickets={xmasFilteredTickets}
-              setFilteredTickets={setXmasFilteredTickets}
-              ticketsLoaded={xmasTicketsLoaded}
-              cart={cart}
-              setCart={setCart}
-              snackbarState={snackbarState}
-            />
-          }
-        />
-        <Route
-          path="/kids"
-          element={
-            <Kids
-              tickets={kidsTickets}
-              setTickets={setKidsTickets}
-              cart={cart}
-              setCart={setCart}
-            />
-          }
-        />
-        <Route
-          path="/cart"
-          element={
-            <Cart
-              cart={cart}
-              setCart={setCart}
-              cartLoaded={cartLoaded}
-              snackbarState={snackbarState}
-            />
-          }
-        />
-      </Routes>
-    </Router>
+    <>
+      <Router>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Xmas
+                xmasTickets={xmasTickets}
+                filteredTickets={xmasFilteredTickets}
+                setFilteredTickets={setXmasFilteredTickets}
+                ticketsLoaded={xmasTicketsLoaded}
+                cart={cart}
+                setCart={setCart}
+                snackbarState={snackbarState}
+              />
+            }
+          />
+          <Route
+            path="/kids"
+            element={
+              <Kids
+                tickets={kidsTickets}
+                setTickets={setKidsTickets}
+                cart={cart}
+                setCart={setCart}
+              />
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <Cart
+                cart={cart}
+                setCart={setCart}
+                cartLoaded={cartLoaded}
+                snackbarState={snackbarState}
+              />
+            }
+          />
+        </Routes>
+      </Router>
+      <CustomSnackbar
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        handleSnackbarClose={handleSnackbarClose}
+        handleSnackbarExited={handleSnackbarExited}
+        message={messageInfo ? messageInfo.message : ""}
+        snackbarKey={messageInfo ? messageInfo.key : 0}
+        status={messageInfo ? messageInfo.status : "success"}
+      />
+    </>
+
   );
 }

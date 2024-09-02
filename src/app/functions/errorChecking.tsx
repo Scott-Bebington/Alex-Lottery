@@ -1,4 +1,3 @@
-import { Snackbar } from "@mui/material";
 import { SnackbarMessage } from "../interfaces/interfaces";
 
 export function checkErrorMessage(message: string): SnackbarMessage {

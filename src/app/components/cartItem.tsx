@@ -1,15 +1,14 @@
 "use client";
 
-import { Button, CardActions, CardContent, CardMedia, Collapse, IconButton, SnackbarCloseReason, Typography } from '@mui/material';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import ActionButton from './actionButton';
-import { addToCart, getTicket, removeFromCart } from '../functions/cart_functions';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import { Button, CardContent, IconButton, Typography } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
 import LotteryTicket from '../classes/lotteryTicket';
+import { addToCart, getTicket, removeFromCart } from '../functions/cart_functions';
 
-import { CartItemProps, SnackbarMessage } from '../interfaces/interfaces';
 import { checkErrorMessage } from '../functions/errorChecking';
+import { CartItemProps, SnackbarMessage } from '../interfaces/interfaces';
 
 export default function CartItem({
   ticket,
@@ -21,6 +20,7 @@ export default function CartItem({
     handleSnackbarOpen,
     handleSnackbarClose,
     handleSnackbarExited,
+    setSnackPack,
     messageInfo,
     snackPack
   }
@@ -108,11 +108,8 @@ export default function CartItem({
       if (ticketsAdded > 0) {
         console.log("Adding tickets to cart");
 
-        try {
-          await addToCart(ticket, ticketsAdded);
-        } catch (error) {
+        await addToCart(ticket, ticketsAdded);
 
-        }
 
       } else {
         const ticketsRemoved = Math.abs(ticketsAdded);
@@ -129,7 +126,10 @@ export default function CartItem({
       return;
     }
 
+    console.log("Changes saved");
     openSnackbar = handleSnackbarOpen("Changes saved", "success");
+    openSnackbar();
+    return;
   }
 
   return (

@@ -1,11 +1,8 @@
 import firebaseConfig from "@/app/firebaseConfig";
-import { getFirestore, collection, doc, updateDoc, getDoc, addDoc, getDocs, setDoc, onSnapshot, runTransaction } from "firebase/firestore";
-import { getDatabase, ref, onValue, update } from "firebase/database";
 import { initializeApp } from "firebase/app";
-import LotteryTicket from "../classes/lotteryTicket";
 import { getAuth } from "firebase/auth";
-import { updateXmasTicketQuantity } from "./xmas_functions";
-import { get } from "http";
+import { collection, doc, getFirestore, onSnapshot, runTransaction } from "firebase/firestore";
+import LotteryTicket from "../classes/lotteryTicket";
 
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);

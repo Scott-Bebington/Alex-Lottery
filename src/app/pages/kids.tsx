@@ -1,15 +1,14 @@
 "use client";
 import { CardActionArea, CardContent, Skeleton, Typography } from "@mui/material";
 import { SnackbarCloseReason } from '@mui/material/Snackbar';
-import { useEffect, useState } from "react";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
-import CustomSnackbar from '../components/snackbar';
-import TicketFilter from '../components/ticketFilter';
 import LotteryTicket from '../classes/lotteryTicket';
+import Footer from '../components/footer';
+import Navbar from '../components/navbar';
+import CustomSnackbar from '../components/snackbar';
 import Ticket from '../components/ticket';
+import TicketFilter from '../components/ticketFilter';
 
 import { KidsDrawProps, SnackbarMessage } from '../interfaces/interfaces';
 

@@ -1,7 +1,5 @@
 "use client";
 import { Autocomplete, TextField } from '@mui/material';
-import React from 'react';
-import LotteryTicket from '../classes/lotteryTicket';
 
 import { TicketFilterProps } from '../interfaces/interfaces';
 

@@ -1,11 +1,8 @@
 "use client";
-import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import RemoveIcon from '@mui/icons-material/Remove';
 import { Alert, AlertColor, IconButton } from "@mui/material";
-import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
-import { Fragment, useEffect, useState } from "react";
-import React from 'react';
+import Snackbar from '@mui/material/Snackbar';
+import { Fragment } from "react";
 
 import { SnackbarProps } from '../interfaces/interfaces';
 

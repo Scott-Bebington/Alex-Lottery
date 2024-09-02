@@ -1,10 +1,8 @@
 "use client";
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { Button, CardActions, CardContent, CardMedia, Collapse, IconButton, Typography } from "@mui/material";
-import React from 'react';
+import { CardActions, CardContent, CardMedia, Collapse, IconButton, Typography } from "@mui/material";
 
-import LotteryTicket from '../classes/lotteryTicket';
 import ActionButton from './actionButton';
 
 import { TicketProps } from '../interfaces/interfaces';
