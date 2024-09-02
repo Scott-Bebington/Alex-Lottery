@@ -7,7 +7,15 @@ import CartItem from "../components/cartItem";
 import Footer from '../components/footer';
 import Navbar from '../components/navbar';
 
-import { CartProps } from '../interfaces/interfaces';
+import { CartProps, SnackbarMessage } from '../interfaces/interfaces';
+import { useEffect } from "react";
+import { initializeApp } from "firebase/app";
+import firebaseConfig from "../firebaseConfig";
+import { getAuth } from "firebase/auth";
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 export default function Cart({
   cart,
@@ -24,6 +32,21 @@ export default function Cart({
     snackPack
   }
 }: CartProps) {
+  const navigate = useNavigate();
+  useEffect(() => {
+
+    if (!auth.currentUser) {
+      let infoMesssage: SnackbarMessage = {
+        message: "You must be logged in to view your cart",
+        key: 0,
+        status: "info"
+      };
+      let openSnackbar = handleSnackbarOpen(infoMesssage.message, 'info');
+      openSnackbar();
+      window.localStorage.setItem('redirectAfterLogin', window.location.pathname);
+      navigate("/login"); // Redirect to the login page
+    }
+  }, []);
 
   function calculateTotal() {
     let total = 0;
@@ -50,11 +73,7 @@ export default function Cart({
   return (
     <main className="min-h-screen flex flex-col justify-between">
       <Navbar />
-
       <Typography variant="h5" className="text-center flex items-center px-small font-bold h-12">Your Cart</Typography>
-
-
-
       <section className="flex flex-1 w-full">
         <div
           className="w-full p-small overflow-y-auto bg-white mx-small mb-small rounded"
@@ -73,7 +92,7 @@ export default function Cart({
                 key={index}
               >
                 <CardActionArea>
-                  <Skeleton variant="rectangular" height={140} />
+                  <Skeleton variant="rectangular" height={120} />
                   <CardContent>
                     <Skeleton variant="text" />
                     <Skeleton variant="text" />

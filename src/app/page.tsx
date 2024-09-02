@@ -13,9 +13,16 @@ import { getAllXmasTickets } from "./functions/xmas_functions";
 
 import CustomSnackbar from './components/snackbar';
 import { SnackbarMessage } from './interfaces/interfaces';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import Login from './pages/login';
 
 export default function Home() {
   const [isClient, setIsClient] = useState<boolean>(false);
+
+  /**
+   * User state management
+   */
+  const [user, setUser] = useState(null);
 
   /*
     * Snackbar state management
@@ -56,7 +63,6 @@ export default function Home() {
 
       const getAllData = async () => {
         await getAllXmasTickets(setXmasTickets, setXmasTicketsLoaded, setXmasFilteredTickets);
-        // Get kids tickets
         await getCart(setCart, setCartLoaded);
       }
 
@@ -165,6 +171,14 @@ export default function Home() {
                 cart={cart}
                 setCart={setCart}
                 cartLoaded={cartLoaded}
+                snackbarState={snackbarState}
+              />
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <Login
                 snackbarState={snackbarState}
               />
             }

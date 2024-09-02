@@ -39,3 +39,30 @@ export function checkErrorMessage(message: string): SnackbarMessage {
     }
     return returnMessage;
 }
+
+export function checkLoginError(message: string): SnackbarMessage {
+
+    var returnMessage: SnackbarMessage = {
+        message: "",
+        key: 0,
+        status: "error"
+    };
+
+    if (message === "Firebase: Error (auth/invalid-credential).") {
+        returnMessage.message = "Login credentials are incorrect";
+    } else if (message === "Firebase: Error (auth/user-not-found).") {
+        returnMessage.message = "User not found";
+    } else if (message === "Firebase: Error (auth/invalid-password).") {
+        returnMessage.message = "Password is incorrect";
+    } else if (message === "Firebase: Error (auth/too-many-requests).") {
+        returnMessage.message = "Too many login attempts. Please try again later";
+    } else if (message === "Firebase: Error (auth/network-request-failed).") {
+        returnMessage.message = "Network error. Please try again later";
+    } else if (message === "Firebase: Error (auth/invalid-email).") {
+        returnMessage.message = "Invalid email address";
+    }
+    else {
+        returnMessage.message = message;
+    }
+    return returnMessage;
+}

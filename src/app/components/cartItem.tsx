@@ -15,14 +15,7 @@ export default function CartItem({
   cart,
   setCart,
   snackbarState: {
-    snackbarOpen,
-    setSnackbarOpen,
     handleSnackbarOpen,
-    handleSnackbarClose,
-    handleSnackbarExited,
-    setSnackPack,
-    messageInfo,
-    snackPack
   }
 }: CartItemProps) {
 
@@ -99,7 +92,8 @@ export default function CartItem({
     let openSnackbar;
 
     if (ticketsAdded === 0) {
-      console.log("No tickets added to cart");
+      openSnackbar = handleSnackbarOpen("No changes made", "info");
+      openSnackbar();
       return;
     }
 
@@ -130,6 +124,13 @@ export default function CartItem({
     openSnackbar = handleSnackbarOpen("Changes saved", "success");
     openSnackbar();
     return;
+  }
+
+  const cancelChanges = () => {
+    console.log("Cancelling changes");
+    setTicketsAdded(0);
+    setQuantity(ticket.quantity - ticketsAdded);
+    setRemainingTickets(remainingTickets + ticketsAdded);
   }
 
   return (
@@ -207,6 +208,13 @@ export default function CartItem({
             }}
           >
             Save Changes
+          </Button>
+          <Button
+            onClick={() => {
+              cancelChanges();
+            }}
+          >
+            Cancel Changes
           </Button>
         </section>
 

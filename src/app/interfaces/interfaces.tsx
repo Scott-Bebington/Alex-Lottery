@@ -130,6 +130,15 @@ export interface SnackbarProps {
     status: string;
 }
 
+/**
+ * Login props used by the Login page
+ * @interface LoginProps
+ * @exports LoginProps
+ */
+export interface LoginProps {
+    snackbarState: SnackBarStateHandler;
+}
+
 
 
 
