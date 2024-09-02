@@ -1,5 +1,5 @@
 import firebaseConfig from "@/app/firebaseConfig";
-import { getFirestore, collection, doc, updateDoc, getDoc, addDoc, getDocs, setDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, doc, updateDoc, getDoc, addDoc, getDocs, setDoc, onSnapshot, runTransaction } from "firebase/firestore";
 import { getDatabase, ref, onValue, update } from "firebase/database";
 import { initializeApp } from "firebase/app";
 import LotteryTicket from "../classes/lotteryTicket";
@@ -36,26 +36,28 @@ export async function getCart(
 
   if (cart === null) {
     console.log("Cart is empty");
+    setCartLoaded(true);
     return;
   }
 
-  const cartSnapshot = await getDocs(cart);
-  const cartItems: LotteryTicket[] = [];
-  cartSnapshot.forEach((doc) => {
-    const ticketData = doc.data();
-    const ticket = new LotteryTicket(
-      ticketData.ticketNum,
-      ticketData.drawDate,
-      ticketData.cost,
-      ticketData.type,
-      ticketData.quantity,
-      doc.id,
-      ticketData.image
-    );
-    cartItems.push(ticket);
+  onSnapshot(cart, (snapshot) => {
+    const cartItems: LotteryTicket[] = [];
+    snapshot.forEach((doc) => {
+      const ticketData = doc.data();
+      const ticket = new LotteryTicket(
+        ticketData.ticketNum,
+        ticketData.drawDate,
+        ticketData.cost,
+        ticketData.type,
+        ticketData.quantity,
+        doc.id,
+        ticketData.image
+      );
+      cartItems.push(ticket);
+    });
+    setCart(cartItems);
+    setCartLoaded(true);
   });
-  setCart(cartItems);
-  setCartLoaded(true);
 }
 
 export async function getTicket(ticketID: string, ticketType: string, setTicketsLeft: (ticketsLeft: number) => void) {
@@ -82,108 +84,86 @@ export async function getTicket(ticketID: string, ticketType: string, setTickets
  * 
  * @returns void
  */
-export async function addToCart(
-  selectedTicket: LotteryTicket,
-  ticketsAddedToCart: number,
-  cart: LotteryTicket[],
-  setCart: (cart: LotteryTicket[]) => void,
-  ticketType: string) {
+export async function addToCart(inTicket: LotteryTicket, ticketsAdded: number) {
 
-  console.log('----------------------ADD TICKET TO CART-------------------');
+  console.log("Adding ticket to cart");
+  console.log("Ticket ID: ", inTicket);
+  console.log("Ticket Type: ", inTicket.type);
+  console.log("Tickets Added: ", ticketsAdded);
 
-  // CHECK TO SEE IF THE USER IS LOGGED IN
+  // Check if the user is logged in
   // if (auth.currentUser === null) {
   //     throw new Error("User is not logged in");
   // }
 
-  if (selectedTicket === null) {
-    throw new Error("No ticket selected");
+  // Check to see if the ticket is not null or empty
+  if (!inTicket || inTicket.ticketID === "") {
+      throw new Error("Ticket ID is missing");
   }
 
-  if (ticketsAddedToCart === 0) {
-    throw new Error("No tickets added to cart");
+  // Check to see if the ticket type is not null or empty
+  if (!inTicket.type || (inTicket.type !== "" && inTicket.type !== "Xmas_Draw" && inTicket.type !== "Kids_Draw")) {
+      throw new Error("Ticket type is missing or incorrect");
   }
 
-  const ticket = new LotteryTicket(
-    selectedTicket.number,
-    selectedTicket.date,
-    selectedTicket.cost,
-    ticketType,
-    ticketsAddedToCart,
-    selectedTicket.ticketID,
-    selectedTicket.image
-  );
-
-  const existingTicket = cart.find(ticket => ticket.ticketID === selectedTicket.ticketID);
-  if (existingTicket) {
-    existingTicket.quantity += ticketsAddedToCart;
-    setCart([...cart]);
-  } else {
-    setCart([...cart, ticket]);
+  // Check to see if the number of tickets added is not null or empty
+  if (!ticketsAdded || ticketsAdded <= 0) {
+      throw new Error("Number of tickets added is missing or incorrect");
   }
 
-  // Do error checking to make sure there is a ticket in the db before adding to cart(check being done for redundancy)
-  const ticketDetails = doc(collection(firestore, ticketType), selectedTicket.ticketID);
+  await runTransaction(firestore, async (transaction) => {
+      
+      // Get the ticket document
+      const ticketRef = doc(collection(firestore, inTicket.type), inTicket.ticketID);
+      const ticketDoc = await transaction.get(ticketRef);
 
-  // Check to see if the ticket exists in the database
-  const ticketSnapshot = await getDoc(ticketDetails);
-  if (!ticketSnapshot.exists()) {
-    throw new Error("Ticket not found in the database");
-  }
-
-  const user = collection(firestore, "users");
-  const userDoc = doc(user, "INiMgoj9TCetIOyUKcX4bYNo2va2");
-  const userCart = collection(userDoc, "Cart");
-
-  // Add the ticket to the user's cart
-  // First check to see if the ticket is already in the cart
-  const ticketInCart = await getDoc(doc(userCart, selectedTicket.ticketID));
-
-  if (ticketInCart.exists()) {
-    console.log("Ticket is already in cart, updating quantity");
-    const ticketData = ticketInCart.data();
-    const newQuantity = ticketData.quantity + ticketsAddedToCart;
-    await updateDoc(doc(userCart, selectedTicket.ticketID), {
-      quantity: newQuantity
-    });
-  } else {
-    console.log("Ticket not in cart, adding a new entry");
-
-    await setDoc(doc(userCart, selectedTicket.ticketID), {
-      "cost": selectedTicket.cost,
-      "drawDate": selectedTicket.date,
-      "image": selectedTicket.image,
-      "quantity": ticketsAddedToCart,
-      "ticketNum": selectedTicket.number,
-      "type": ticketType
-    });
-  }
-
-  // Update the quantity of the ticket in the database
-  try {
-    const newQuantity = selectedTicket.quantity - ticketsAddedToCart;
-    console.log("Selected ticket quantity: ", selectedTicket.quantity);
-    console.log("Tickets added to cart: ", ticketsAddedToCart);
-    console.log('New quantity for the ticket in the xmas collection: ', newQuantity);
-    updateXmasTicketQuantity(selectedTicket.ticketID, newQuantity);
-  } catch (error) {
-    try {
-      await removeFromCart(selectedTicket);
-
-      const existingTicket = cart.find(ticket => ticket.ticketID === selectedTicket.ticketID);
-      if (existingTicket) {
-        existingTicket.quantity -= ticketsAddedToCart;
-        setCart([...cart]);
-      } else {
-        const newCart = cart.filter(ticket => ticket.ticketID !== selectedTicket.ticketID);
-        setCart(newCart);
+      // Check if the ticket exists
+      if (!ticketDoc.exists()) {
+          throw new Error("Ticket does not exist");
       }
-    } catch (error) {
-      throw new Error("Error removing ticket from cart");
-    }
-  }
 
-  console.log('----------------------ADD TICKET TO CART-------------------');
+      console.log("Ticket exists");
+
+      // Get the ticket data
+      const ticketData = ticketDoc.data();
+
+      // Check if the ticket quantity is not null or empty
+      if (!ticketData.quantity || ticketData.quantity <= 0) {
+          throw new Error("Ticket quantity is missing or incorrect");
+      }
+
+      // Check if the ticket quantity is greater than the number of tickets added
+      if (ticketData.quantity < ticketsAdded) {
+          throw new Error("Not enough tickets in stock");
+      }
+
+      // Check to see if the ticket is already in the cart
+      const cartRef = doc(collection(firestore, "users", "INiMgoj9TCetIOyUKcX4bYNo2va2", "Cart"), inTicket.ticketID);
+      const cartDoc = await transaction.get(cartRef);
+
+      // Check if the ticket is already in the cart
+      if (cartDoc.exists()) {
+          const cartData = cartDoc.data();
+          const newQuantity = cartData.quantity + ticketsAdded;
+          transaction.update(cartRef, { quantity: newQuantity });
+      } else {
+          transaction.set(cartRef, {
+              cost: inTicket.cost,
+              drawDate: inTicket.date,
+              quantity: ticketsAdded,
+              image: inTicket.image,
+              ticketNum: inTicket.number,
+              type: inTicket.type
+          });
+      }
+
+      // Update the ticket quantity
+      const newQuantity = ticketData.quantity - ticketsAdded;
+      transaction.update(ticketRef, { quantity: newQuantity });
+  });
+
+  console.log("Ticket added to cart successfully");
+
 }
 
 export async function updateTicketInCart(
@@ -192,45 +172,90 @@ export async function updateTicketInCart(
   cart: LotteryTicket[],
   setCart: (cart: LotteryTicket[]) => void) {
 
-  // const user = collection(firestore, "users");
-  // const userDoc = doc(user, "INiMgoj9TCetIOyUKcX4bYNo2va2");
-  // const userCart = collection(userDoc, "Cart");
-
-  // const ticketRef = doc(userCart, ticket.ticketID);
-
-  // await updateDoc(ticketRef, {
-  //   quantity: newQuantity
-  // });
-
-  // If the newQuantity is greater than the ticket quantity, attempt to add more tickets from the database into the cart
-  if (newQuantity > 0) {
-
-    console.log('----------------------UPDATE TICKET IN CART-------------------');
-
-    console.log('New Quantity: ', newQuantity);
-    console.log('Ticket type: ', ticket.type);
-    console.log('Ticket quantity: ', ticket.quantity);
-
-    const newTicket: LotteryTicket = new LotteryTicket(
-      ticket.number,
-      ticket.date,
-      ticket.cost,
-      ticket.type,
-      ticket.quantity - newQuantity,
-      ticket.ticketID,
-      ticket.image
-    );
-
-    await addToCart(newTicket, newQuantity, cart, setCart, ticket.type);
-    console.log('Ticket added to cart');
-
-    console.log('----------------------UPDATE TICKET IN CART-------------------');
-  }
 
 }
 
-export async function removeFromCart(ticket: LotteryTicket) {
+export async function removeFromCart(inTicket: LotteryTicket, ticketsRemoved: number) {
+    
+  console.log("Removing ticket from cart");
+  console.log("Ticket ID: ", inTicket);
+  console.log("Ticket Type: ", inTicket.type);
+  console.log("Tickets Removed: ", ticketsRemoved);
 
+  // Check if the user is logged in
+  // if (auth.currentUser === null) {
+  //     throw new Error("User is not logged in");
+  // }
+
+  // Check to see if the ticket is not null or empty
+  if (!inTicket || inTicket.ticketID === "") {
+      throw new Error("Ticket ID is missing");
+  }
+
+  // Check to see if the ticket type is not null or empty
+  if (!inTicket.type || (inTicket.type !== "" && inTicket.type !== "Xmas_Draw" && inTicket.type !== "Kids_Draw")) {
+      throw new Error("Ticket type is missing or incorrect");
+  }
+
+  // Check to see if the number of tickets removed is not null or empty
+  if (!ticketsRemoved || ticketsRemoved <= 0) {
+      throw new Error("Number of tickets removed is missing or incorrect");
+  }
+
+  await runTransaction(firestore, async (transaction) => {
+      
+      // Get the cart document
+      const cartRef = doc(collection(firestore, "users", "INiMgoj9TCetIOyUKcX4bYNo2va2", "Cart"), inTicket.ticketID);
+      const cartDoc = await transaction.get(cartRef);
+
+      // Check if the ticket exists in the cart
+      if (!cartDoc.exists()) {
+          throw new Error("Ticket does not exist in the cart");
+      }
+
+      console.log("Ticket exists in the cart");
+
+      // Get the cart data
+      const cartData = cartDoc.data();
+
+      // Check if the ticket quantity in the cart is not null or empty
+      if (!cartData.quantity || cartData.quantity <= 0) {
+          throw new Error("Ticket quantity in the cart is missing or incorrect");
+      }
+
+      // Check if the number of tickets removed is greater than the quantity in the cart
+      if (cartData.quantity < ticketsRemoved) {
+          throw new Error("Not enough tickets in the cart");
+      }
+
+      // Check to see if the ticket is already in the collection
+      const ticketRef = doc(collection(firestore, inTicket.type), inTicket.ticketID);
+      const ticketDoc = await transaction.get(ticketRef);
+
+      // Check if the ticket exists in the collection
+      if (!ticketDoc.exists()) {
+          throw new Error("Ticket does not exist in the collection");
+      }
+
+      console.log("Ticket exists in the collection");
+
+      // Get the ticket data
+      const ticketData = ticketDoc.data();
+
+      // Update the ticket quantity in the collection
+      const newQuantity = ticketData.quantity + ticketsRemoved;
+      transaction.update(ticketRef, { quantity: newQuantity });
+
+      // Update the ticket quantity in the cart
+      const newCartQuantity = cartData.quantity - ticketsRemoved;
+      if (newCartQuantity === 0) {
+          transaction.delete(cartRef);
+      } else {
+          transaction.update(cartRef, { quantity: newCartQuantity });
+      }
+  });
+
+  console.log("Ticket removed from cart successfully");
 }
 
 export async function clearCart() {

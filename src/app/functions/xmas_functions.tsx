@@ -27,7 +27,7 @@ export async function getAllXmasTickets(setXmasTickets: (tickets: LotteryTicket[
                 continue;
             }
 
-            tickets.push(new LotteryTicket(ticket.ticketNum, formattedDate, ticket.cost, "Xmas Draw", ticket.quantity, ticketID, ticket.image));
+            tickets.push(new LotteryTicket(ticket.ticketNum, formattedDate, ticket.cost, "Xmas_Draw", ticket.quantity, ticketID, ticket.image));
         }
         // console.log("Xmas tickets have been fetched");
         setXmasTickets(tickets);

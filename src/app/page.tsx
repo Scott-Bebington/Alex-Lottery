@@ -15,9 +15,21 @@ import { getDatabase, ref, onValue } from "firebase/database";
 import { getAllXmasTickets } from "./functions/xmas_functions";
 import { getCart } from './functions/cart_functions';
 
+interface SnackbarMessage {
+  message: string;
+  key: number;
+  status: string;
+}
+
 export default function Home() {
   const [isClient, setIsClient] = useState<boolean>(false);
 
+  /*
+  * Snackbar state management
+  */
+  const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [messageInfo, setMessageInfo] = useState<SnackbarMessage | undefined>(undefined);
 
   const [xmasTickets, setXmasTickets] = useState<LotteryTicket[]>([]);
   const [xmasFilteredTickets, setXmasFilteredTickets] = useState<LotteryTicket[]>([]);
@@ -63,25 +75,28 @@ export default function Home() {
   }
 
 
+
+
   return (
     <Router>
       <Routes>
         <Route
           path="/"
           element={
-            // <Xmas
-            //   xmasTickets={xmasTickets}
-            //   filteredTickets={xmasFilteredTickets}
-            //   setFilteredTickets={setXmasFilteredTickets}
-            //   ticketsLoaded={xmasTicketsLoaded}
-            //   cart={cart}
-            //   setCart={setCart}
-            // />
-            <Cart 
+            <Xmas
+              xmasTickets={xmasTickets}
+              filteredTickets={xmasFilteredTickets}
+              setFilteredTickets={setXmasFilteredTickets}
+              ticketsLoaded={xmasTicketsLoaded}
               cart={cart}
               setCart={setCart}
-              cartLoaded={cartLoaded}
+              
             />
+            // <Cart 
+            //   cart={cart}
+            //   setCart={setCart}
+            //   cartLoaded={cartLoaded}
+            // />
           }
         />
         <Route
@@ -98,13 +113,18 @@ export default function Home() {
         <Route
           path="/cart"
           element={
-            <Xmas
-              xmasTickets={xmasTickets}
-              filteredTickets={xmasFilteredTickets}
-              setFilteredTickets={setXmasFilteredTickets}
-              ticketsLoaded={xmasTicketsLoaded}
+            // <Xmas
+            //   xmasTickets={xmasTickets}
+            //   filteredTickets={xmasFilteredTickets}
+            //   setFilteredTickets={setXmasFilteredTickets}
+            //   ticketsLoaded={xmasTicketsLoaded}
+            //   cart={cart}
+            //   setCart={setCart}
+            // />
+            <Cart
               cart={cart}
               setCart={setCart}
+              cartLoaded={cartLoaded}
             />
           }
         />

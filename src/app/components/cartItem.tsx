@@ -3,7 +3,7 @@
 import { Button, CardActions, CardContent, CardMedia, Collapse, IconButton, Typography } from '@mui/material';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ActionButton from './actionButton';
-import { addToCart, getTicket, updateTicketInCart } from '../functions/cart_functions';
+import { addToCart, getTicket, removeFromCart } from '../functions/cart_functions';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import LotteryTicket from '../classes/lotteryTicket';
@@ -92,49 +92,20 @@ export default function CartItem({
   const saveChanges = async () => {
 
     if (ticketsAdded === 0) {
+      console.log("No tickets added to cart");
       return;
     }
 
     try {
 
-      console.log('------------ADDING TO CART FROM CART------------');
-
-      console.log('Selected ticket Data: ');
-      console.log("Cost: ", ticket.cost);
-      console.log("Date: ", ticket.date);
-      console.log("Number: ", ticket.number);
-      console.log("Quantity: ", (remainingTickets + ticketsAdded));
-      console.log("Ticket ID: ", ticket.ticketID);
-      console.log("Image: ", ticket.image);
-      console.log("Type: ", ticket.type);
-
-      console.log('Tickets Added to Cart: ');
-      console.log("Tickets Added: ", ticketsAdded);
-
-      const newTicket = new LotteryTicket(
-        ticket.number,
-        ticket.date,
-        ticket.cost,
-        ticket.type,
-        remainingTickets + ticketsAdded,
-        ticket.ticketID,
-        ticket.image
-      );
-
-      await addToCart(
-        newTicket,
-        ticketsAdded,
-        cart,
-        setCart,
-        newTicket.type
-      );
-
-      console.log('------------ADDING TO CART FROM CART------------');
-
-      // console.log('Adding to cart');
-
-      // await updateTicketInCart(ticket, ticketsAdded, cart, setCart);
-
+      if (ticketsAdded > 0) {
+        console.log("Adding tickets to cart");
+        await addToCart(ticket, ticketsAdded);
+      } else {
+        const ticketsRemoved = Math.abs(ticketsAdded);
+        await removeFromCart(ticket, ticketsRemoved);
+        console.log("Removing tickets from cart");
+      }
       
     } catch (error) {
       console.error('Error adding tickets to cart: ', error);
