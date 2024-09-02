@@ -3,14 +3,7 @@ import { Autocomplete, TextField } from '@mui/material';
 import React from 'react';
 import LotteryTicket from '../classes/lotteryTicket';
 
-interface TicketFilterProps {
-  id: string;
-  label: string;
-  tickets: LotteryTicket[];
-  setInputValue: (value: string) => void;
-  inputValue: string;
-  getOptionLabel: (ticket: LotteryTicket) => string | number | string[];
-}
+import { TicketFilterProps } from '../interfaces/interfaces';
 
 export default function TicketFilter({
   id,

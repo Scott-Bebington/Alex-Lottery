@@ -1,17 +1,7 @@
 import { Button } from '@mui/material';
 import React from 'react';
 
-interface ActionButtonProps {
-    onClick: () => void; // onClick can be a synchronous function
-    className?: string;
-    staticText: string;
-    loadingText: string;
-    border?: string;
-    backgroundColour?: string;
-    colour?: string;
-    hoverColour?: string;
-    hoverBackgroundColour?: string;
-}
+import { ActionButtonProps } from '../interfaces/interfaces';
 
 function ActionButton({ onClick, className, staticText, loadingText, border, backgroundColour, colour, hoverColour, hoverBackgroundColour }: ActionButtonProps) {
     const [loading, setLoading] = React.useState(false);

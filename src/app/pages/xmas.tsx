@@ -13,33 +13,8 @@ import Ticket from '../components/ticket';
 
 import { addToCart } from "../functions/cart_functions";
 
-
-
-interface SnackbarMessage {
-  message: string;
-  key: number;
-  status: string;
-}
-
-interface SnackBarStateHandler {
-  snackbarOpen: boolean;
-  setSnackbarOpen: (value: boolean) => void;
-  handleSnackbarOpen: (message: string, status: string) => () => void;
-  handleSnackbarClose: (event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => void;
-  handleSnackbarExited: () => void;
-  messageInfo: SnackbarMessage | undefined;
-  setSnackPack: (value: SnackbarMessage[]) => void;
-  snackPack: readonly SnackbarMessage[];
-}
-
-interface XmasDrawProps {
-  xmasTickets: LotteryTicket[];
-  filteredTickets: LotteryTicket[];
-  setFilteredTickets: (tickets: LotteryTicket[]) => void;
-  ticketsLoaded: boolean;
-  cart: LotteryTicket[];
-  setCart: (cart: LotteryTicket[]) => void;
-}
+import { SnackbarMessage, XmasDrawProps } from '../interfaces/interfaces';
+import { checkErrorMessage } from "../functions/errorChecking";
 
 export default function XmasDraw(
   {
@@ -48,18 +23,17 @@ export default function XmasDraw(
     setFilteredTickets,
     ticketsLoaded,
     cart,
-    setCart
-  }: XmasDrawProps,
-  {
-    snackbarOpen,
-    setSnackbarOpen,
-    handleSnackbarOpen,
-    handleSnackbarClose,
-    handleSnackbarExited,
-    messageInfo,
-    setSnackPack,
-    snackPack
-  }: SnackBarStateHandler
+    setCart,
+    snackbarState: {
+      snackbarOpen,
+      setSnackbarOpen,
+      handleSnackbarOpen,
+      handleSnackbarClose,
+      handleSnackbarExited,
+      messageInfo,
+      snackPack
+    }
+  }: XmasDrawProps
 ) {
   /*
   * Ticket filter state management
@@ -78,13 +52,6 @@ export default function XmasDraw(
   const [ticketsAddedToCart, setTicketsAddedToCart] = useState<number>(0);
 
   /*
-  * Snackbar state management
-  */
-  // const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
-  // const [snackbarOpen, setSnackbarOpen] = useState(false);
-  // const [messageInfo, setMessageInfo] = useState<SnackbarMessage | undefined>(undefined);
-
-  /*
   * Expanded state management
   */
   const [expandedState, setExpandedState] = useState<{ [key: number]: boolean }>({});
@@ -101,39 +68,6 @@ export default function XmasDraw(
     setTicketsAddedToCart(0);
     setSelectedTicket(xmasTickets.find(ticket => ticket.number === ticketNumber) || null);
   };
-
-  /*
-  * Snackbar functions
-  */
-  // useEffect(() => {
-  //   if (snackPack.length && !messageInfo) {
-  //     // Set a new snack when we don't have an active one
-  //     setMessageInfo({ ...snackPack[0] });
-  //     setSnackPack((prev) => prev.slice(1));
-  //     setSnackbarOpen(true);
-  //   } else if (snackPack.length && messageInfo && snackbarOpen) {
-  //     // Close an active snack when a new one is added
-  //     setSnackbarOpen(false);
-  //   }
-  // }, [snackPack, messageInfo, snackbarOpen]);
-
-  // const handleSnackbarOpen = (message: string, status: string) => () => {
-  //   setSnackPack((prev) => [...prev, { message, key: new Date().getTime(), status: status }]);
-  // };
-
-  // const handleSnackbarClose = (
-  //   event: React.SyntheticEvent | Event,
-  //   reason?: SnackbarCloseReason,
-  // ) => {
-  //   if (reason === 'clickaway') {
-  //     return;
-  //   }
-  //   setSnackbarOpen(false);
-  // };
-
-  // const handleSnackbarExited = () => {
-  //   setMessageInfo(undefined);
-  // };
 
   /*
   * Ticket adding functions
@@ -178,41 +112,9 @@ export default function XmasDraw(
 
     } catch (error: Error | any) {
       console.error(error.message);
-      if (error.message === "User is not logged in") {
-        openSnackbar = handleSnackbarOpen("Please log in before adding items to cart", "warning");
-        openSnackbar();
-        return;
-      } else if (error.message === "Ticket ID is missing") {
-        openSnackbar = handleSnackbarOpen("No ticket selected", "error");
-        openSnackbar();
-        return;
-      } else if (error.message === "Ticket type is missing or incorrect") {
-        openSnackbar = handleSnackbarOpen("Error adding tickets to cart", "error");
-        openSnackbar();
-        return;
-      } else if (error.message === "Number of tickets added is missing or incorrect") {
-        openSnackbar = handleSnackbarOpen("No tickets added to cart", "error");
-        openSnackbar();
-        return;
-      } else if (error.message === "Ticket does not exist") {
-        openSnackbar = handleSnackbarOpen("This ticket has been sold out", "error");
-        openSnackbar();
-        return;
-      } else if (error.message === "Ticket quantity is missing or incorrect") {
-        openSnackbar = handleSnackbarOpen("Please add a ticket", "error");
-        openSnackbar();
-        return;
-      } else if (error.message === "Not enough tickets in stock") {
-        openSnackbar = handleSnackbarOpen("Not enough tickets in stock", "error");
-        openSnackbar();
-        return;
-      } else if (error.message === "Missing or insufficient permissions") {
-        openSnackbar = handleSnackbarOpen("Ticket may be sold out", "error");
-        openSnackbar();
-        return;
-      }
 
-      openSnackbar = handleSnackbarOpen(error.message, "error");
+      const errorMessage: SnackbarMessage = checkErrorMessage(error.message);
+      openSnackbar = handleSnackbarOpen(errorMessage.message, errorMessage.status);
       openSnackbar();
       return;
     }

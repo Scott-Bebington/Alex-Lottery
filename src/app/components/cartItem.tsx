@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, CardActions, CardContent, CardMedia, Collapse, IconButton, Typography } from '@mui/material';
+import { Button, CardActions, CardContent, CardMedia, Collapse, IconButton, SnackbarCloseReason, Typography } from '@mui/material';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ActionButton from './actionButton';
 import { addToCart, getTicket, removeFromCart } from '../functions/cart_functions';
@@ -8,16 +8,22 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import LotteryTicket from '../classes/lotteryTicket';
 
-interface CartItemProps {
-  ticket: LotteryTicket;
-  cart: LotteryTicket[];
-  setCart: (cart: LotteryTicket[]) => void;
-}
+import { CartItemProps, SnackbarMessage } from '../interfaces/interfaces';
+import { checkErrorMessage } from '../functions/errorChecking';
 
 export default function CartItem({
   ticket,
   cart,
-  setCart
+  setCart,
+  snackbarState: {
+    snackbarOpen,
+    setSnackbarOpen,
+    handleSnackbarOpen,
+    handleSnackbarClose,
+    handleSnackbarExited,
+    messageInfo,
+    snackPack
+  }
 }: CartItemProps) {
 
   const [quantity, setQuantity] = useState<number>(ticket.quantity);
@@ -90,6 +96,7 @@ export default function CartItem({
   }
 
   const saveChanges = async () => {
+    let openSnackbar;
 
     if (ticketsAdded === 0) {
       console.log("No tickets added to cart");
@@ -100,16 +107,29 @@ export default function CartItem({
 
       if (ticketsAdded > 0) {
         console.log("Adding tickets to cart");
-        await addToCart(ticket, ticketsAdded);
+
+        try {
+          await addToCart(ticket, ticketsAdded);
+        } catch (error) {
+
+        }
+
       } else {
         const ticketsRemoved = Math.abs(ticketsAdded);
         await removeFromCart(ticket, ticketsRemoved);
         console.log("Removing tickets from cart");
       }
-      
-    } catch (error) {
-      console.error('Error adding tickets to cart: ', error);
+
+    } catch (error: Error | any) {
+      console.error(error.message);
+
+      const errorMessage: SnackbarMessage = checkErrorMessage(error.message);
+      openSnackbar = handleSnackbarOpen(errorMessage.message, errorMessage.status);
+      openSnackbar();
+      return;
     }
+
+    openSnackbar = handleSnackbarOpen("Changes saved", "success");
   }
 
   return (

@@ -7,16 +7,7 @@ import React from 'react';
 import LotteryTicket from '../classes/lotteryTicket';
 import ActionButton from './actionButton';
 
-interface TicketProps {
-  ticket: LotteryTicket;
-  expandedState: { [key: number]: boolean };
-  handleExpandClick: (ticketNumber: number) => void;
-  ticketsAddedToCart: number;
-  incrementTickets: () => void;
-  decrementTickets: () => void;
-  addTicketsToCart: () => void;
-
-}
+import { TicketProps } from '../interfaces/interfaces';
 
 export default function Ticket(
   {

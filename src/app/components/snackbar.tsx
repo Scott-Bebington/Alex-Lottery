@@ -7,15 +7,7 @@ import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import { Fragment, useEffect, useState } from "react";
 import React from 'react';
 
-interface SnackbarProps {
-    snackbarOpen: boolean;
-    setSnackbarOpen: (value: boolean) => void;
-    handleSnackbarClose: (event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason,) => void;
-    handleSnackbarExited: () => void;
-    message: string;
-    snackbarKey: number;
-    status: string;
-}
+import { SnackbarProps } from '../interfaces/interfaces';
 
 export default function CustomSnackbar({
     snackbarOpen,

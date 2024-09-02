@@ -1,5 +1,5 @@
 "use client";
-import { CardActionArea, CardContent, Skeleton, Typography } from "@mui/material";
+import { CardActionArea, CardContent, Skeleton, SnackbarCloseReason, Typography } from "@mui/material";
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -9,16 +9,22 @@ import LotteryTicket from "../classes/lotteryTicket";
 import { getCart } from "../functions/cart_functions";
 import CartItem from "../components/cartItem";
 
-interface CartProps {
-  cart: LotteryTicket[];
-  setCart: (cart: LotteryTicket[]) => void;
-  cartLoaded: boolean;
-}
+import { CartProps } from '../interfaces/interfaces';
 
 export default function Cart({
   cart,
   setCart,
-  cartLoaded
+  cartLoaded,
+  snackbarState: {
+    snackbarOpen,
+    setSnackbarOpen,
+    handleSnackbarOpen,
+    handleSnackbarClose,
+    handleSnackbarExited,
+    setSnackPack,
+    messageInfo,
+    snackPack
+  }
 }: CartProps) {
 
   function calculateTotal() {
@@ -31,6 +37,17 @@ export default function Cart({
     return total;
 
   }
+
+  const snackbarState = {
+    snackbarOpen,
+    setSnackbarOpen,
+    handleSnackbarOpen,
+    handleSnackbarClose,
+    handleSnackbarExited,
+    setSnackPack,
+    messageInfo,
+    snackPack
+  };
 
   return (
     <main className="min-h-screen flex flex-col justify-between">
@@ -76,6 +93,7 @@ export default function Cart({
                   ticket={ticket}
                   cart={cart}
                   setCart={setCart}
+                  snackbarState={snackbarState}
                 />
 
               ))

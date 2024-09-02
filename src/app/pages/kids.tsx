@@ -11,19 +11,7 @@ import TicketFilter from '../components/ticketFilter';
 import LotteryTicket from '../classes/lotteryTicket';
 import Ticket from '../components/ticket';
 
-
-export interface SnackbarMessage {
-    message: string;
-    key: number;
-    status: string;
-}
-
-interface KidsDrawProps {
-    tickets: LotteryTicket[];
-    setTickets: (cart: LotteryTicket[]) => void;
-    cart: LotteryTicket[];
-    setCart: (cart: LotteryTicket[]) => void;
-}
+import { KidsDrawProps, SnackbarMessage } from '../interfaces/interfaces';
 
 export default function KidsDraw({
     tickets,
