@@ -12,6 +12,7 @@ import { addToCart } from "../functions/cart_functions";
 
 import { checkErrorMessage } from "../functions/errorChecking";
 import { SnackbarMessage, XmasDrawProps } from '../interfaces/interfaces';
+import { useNavigate } from "react-router-dom";
 
 export default function XmasDraw(
   {
@@ -41,6 +42,18 @@ export default function XmasDraw(
   const filterByDate = (ticket: LotteryTicket) => ticket.date.toString();
   const filterByNumber = (ticket: LotteryTicket) => ticket.number.toString();
   const filterByCost = (ticket: LotteryTicket) => ticket.cost.toString();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    var redirectPath = window.localStorage.getItem('paymentSuccess') || '/';
+    window.localStorage.removeItem('paymentSuccess')
+
+    if (redirectPath === '/success') {
+      navigate('/success');
+    } else if (redirectPath === '/cart') {
+      navigate('/cart');
+    }
+  }, []);
 
   /*
   * Selected ticket state management
@@ -239,7 +252,7 @@ export default function XmasDraw(
 
       <Footer />
 
-      
+
     </main >
   );
 }

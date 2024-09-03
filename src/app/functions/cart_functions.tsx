@@ -1,8 +1,10 @@
 import firebaseConfig from "@/app/firebaseConfig";
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { collection, doc, getFirestore, onSnapshot, runTransaction } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, runTransaction, setDoc } from "firebase/firestore";
 import LotteryTicket from "../classes/lotteryTicket";
+import { Stripe } from "stripe";
+import { createCheckoutSession } from "./stripe";
 
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
@@ -48,6 +50,7 @@ export async function getCart(
         ticketData.type,
         ticketData.quantity,
         doc.id,
+        ticketData.productRef,
         ticketData.image
       );
       cartItems.push(ticket);
@@ -146,7 +149,8 @@ export async function addToCart(inTicket: LotteryTicket, ticketsAdded: number) {
         quantity: ticketsAdded,
         image: inTicket.image,
         ticketNum: inTicket.number,
-        type: inTicket.type
+        type: inTicket.type,
+        productRef: inTicket.productRef
       });
     }
 
@@ -160,7 +164,7 @@ export async function removeFromCart(inTicket: LotteryTicket, ticketsRemoved: nu
 
   // Check if the user is logged in
   if (auth.currentUser === null) {
-      throw new Error("User is not logged in");
+    throw new Error("User is not logged in");
   }
 
   const userUID = auth.currentUser.uid;
@@ -230,6 +234,52 @@ export async function removeFromCart(inTicket: LotteryTicket, ticketsRemoved: nu
   });
 }
 
-export async function clearCart() {
+export async function clearCart(setCart: (cart: LotteryTicket[]) => void) {
+  
+  // Check if the user is logged in
+  if (auth.currentUser === null) {
+    throw new Error("User is not logged in");
+  }
+  
+  const userUID = auth.currentUser.uid;
+  
+  const cartCollectionRef = collection(firestore, "users", userUID, "Cart");
+  const cartDocs = await getDocs(cartCollectionRef);
+  
+  if (cartDocs.empty) {
+    console.log("Cart is empty");
+    return;
+  }
+  
+  cartDocs.forEach(async (doc) => {
+    await deleteDoc(doc.ref);
+  });
+  
+  setCart([]);
+}
+
+export async function checkout() {
+
+  if (auth.currentUser === null) {
+    throw new Error("User is not logged in");
+  }
+
+  const userUID = auth.currentUser.uid;
+
+  const users = collection(firestore, "users");
+  const user = doc(users, auth.currentUser.uid);
+
+  const cart = collection(user, "Cart");
+
+  if (cart === null) {
+    console.log("Cart is empty");
+    return;
+  }
+
+  const session = await createCheckoutSession();
+
+  console.log(session.url);
+  window.open(session.url!);
+
 
 }

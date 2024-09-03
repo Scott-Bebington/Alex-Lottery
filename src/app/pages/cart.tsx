@@ -1,5 +1,5 @@
 "use client";
-import { CardActionArea, CardContent, Skeleton, Typography } from "@mui/material";
+import { Button, CardActionArea, CardContent, Skeleton, Typography } from "@mui/material";
 
 
 import LotteryTicket from "../classes/lotteryTicket";
@@ -12,7 +12,8 @@ import { useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import firebaseConfig from "../firebaseConfig";
 import { getAuth } from "firebase/auth";
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
+import { checkout } from "../functions/cart_functions";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -44,7 +45,7 @@ export default function Cart({
       let openSnackbar = handleSnackbarOpen(infoMesssage.message, 'info');
       openSnackbar();
       window.localStorage.setItem('redirectAfterLogin', window.location.pathname);
-      navigate("/login"); // Redirect to the login page
+      navigate("/login");
     }
   }, [auth.currentUser]);
 
@@ -123,6 +124,41 @@ export default function Cart({
           style={{ maxHeight: "calc(100vh - 9rem)", alignItems: "flex-start" }}
         >
           <Typography variant="h4" className="text-center">Total: ${calculateTotal()}</Typography>
+          <Button
+            onClick={async () => {
+
+              try {
+                await checkout();
+              } catch (error: Error | any) {
+                if (error.message === "User is not logged in") {
+                  let infoMesssage: SnackbarMessage = {
+                    message: "You must be logged in to checkout",
+                    key: 0,
+                    status: "info"
+                  };
+                  let openSnackbar = handleSnackbarOpen(infoMesssage.message, 'info');
+                  openSnackbar();
+                  return;
+                }
+
+                console.error(error.message);
+              }
+
+              // let infoMesssage: SnackbarMessage = {
+              //   message: "This feature is not yet implemented",
+              //   key: 0,
+              //   status: "info"
+              // };
+              // let openSnackbar = handleSnackbarOpen(infoMesssage.message, 'info');
+              // openSnackbar();
+              // return;
+
+
+
+            }}
+          >
+            Checkout
+          </Button>
         </aside>
       </section>
 

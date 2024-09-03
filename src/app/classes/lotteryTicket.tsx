@@ -1,3 +1,5 @@
+import { DocumentData, DocumentReference } from "firebase/firestore";
+
 /**
  * @param {number} number - The lottery ticket number
  * @param {string} date - The date of the lottery ticket
@@ -14,6 +16,7 @@ class LotteryTicket {
   quantity: number;
   image: string | undefined; // Optional type for image, as it may not always be provided
   ticketID: string;
+  productRef: DocumentReference<unknown, DocumentData>;
 
   constructor(
     number: number,
@@ -22,6 +25,7 @@ class LotteryTicket {
     type: string,
     quantity: number,
     ticketID: string,
+    productRef: DocumentReference<unknown, DocumentData>,
     image?: string // Optional parameter
 
   ) {
@@ -31,6 +35,7 @@ class LotteryTicket {
     this.type = type;
     this.quantity = quantity;
     this.image = image;
+    this.productRef = productRef;
     this.ticketID = ticketID;
   }
 }

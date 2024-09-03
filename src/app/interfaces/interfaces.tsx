@@ -139,6 +139,15 @@ export interface LoginProps {
     snackbarState: SnackBarStateHandler;
 }
 
+/**
+ * Payment success props used by the Success page
+ * @interface SuccessProps
+ * @exports SuccessProps
+ */
+export interface SuccessProps {
+    cart: LotteryTicket[];
+    setCart: (cart: LotteryTicket[]) => void;
+}
 
 
 

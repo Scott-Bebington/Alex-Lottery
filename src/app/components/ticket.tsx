@@ -59,7 +59,7 @@ export default function Ticket(
 
           <section className='flex items-center justify-between'>
             <Typography variant="h5" className='text-slate-800'>
-              $ {ticket.cost.toFixed(2)}
+              {ticket.cost.toFixed(2)} €
             </Typography>
             <div className='flex gap-4'>
               <IconButton

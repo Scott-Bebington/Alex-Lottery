@@ -1,5 +1,5 @@
 import { Button, Divider, FormControl, Icon, IconButton, InputAdornment, InputLabel, OutlinedInput, Snackbar, TextField, Typography } from '@mui/material';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import { ControlPointSharp, Visibility, VisibilityOff } from '@mui/icons-material';
@@ -37,6 +37,12 @@ export default function Login({
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loginText, setLoginText] = useState<string>('Login');
+
+  useMemo(() => {
+    if (auth.currentUser) {
+      navigate('/');
+    }
+  }, [auth.currentUser]);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 

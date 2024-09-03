@@ -17,9 +17,12 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Login from './pages/login';
 import { initializeApp } from 'firebase/app';
 import firebaseConfig from './firebaseConfig';
+import Success from './pages/success';
+// import { fetchAndActivate, getRemoteConfig, getString, getValue } from 'firebase/remote-config';
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
 
 export default function Home() {
   const [isClient, setIsClient] = useState<boolean>(false);
@@ -65,6 +68,29 @@ export default function Home() {
    */
   useEffect(() => {
     if (initialRender.current === false) {
+      // const remoteConfig = getRemoteConfig(app);
+      // remoteConfig.settings.minimumFetchIntervalMillis = 3600000;
+      // const getStripeSecretKey = async () => {
+      //   try {
+      //     fetchAndActivate(remoteConfig)
+      //       .then(() => {
+      //         const stripeSecretKey = getString(remoteConfig, 'STRIPE_SECRET_KEY');
+
+
+      //         console.log("Stripe secret key: ", stripeSecretKey);
+      //         return stripeSecretKey;
+      //       })
+      //       .catch((error) => {
+      //         console.error('Error fetching Remote Config:', error);
+      //       });
+
+      //   } catch (error) {
+      //     console.error('Error fetching Remote Config:', error);
+      //     throw error;
+      //   }
+      // }
+
+      // getStripeSecretKey();
 
       try {
         const getAllData = async () => {
@@ -214,6 +240,17 @@ export default function Home() {
               <Login
                 snackbarState={snackbarState}
               />
+            }
+          />
+          <Route
+            path="/success"
+            element={
+              <div>
+                <Success
+                  cart={cart}
+                  setCart={setCart}
+                />
+              </div>
             }
           />
         </Routes>
