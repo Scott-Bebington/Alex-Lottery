@@ -64,6 +64,8 @@ export default function CartItem({
 
     // Update cart
     setCart(newCart);
+
+    saveChanges();
   }
 
   const removeTickets = () => {
@@ -86,6 +88,8 @@ export default function CartItem({
 
     // Update cart
     setCart(newCart);
+
+    saveChanges();
   }
 
   const saveChanges = async () => {
@@ -127,6 +131,13 @@ export default function CartItem({
   }
 
   const cancelChanges = () => {
+
+    if (ticketsAdded === 0) {
+      let openSnackbar = handleSnackbarOpen("No changes made", "info");
+      openSnackbar();
+      return;
+    }
+
     console.log("Cancelling changes");
     setTicketsAdded(0);
     setQuantity(ticket.quantity - ticketsAdded);
@@ -201,7 +212,7 @@ export default function CartItem({
           </Typography>
         </section>
 
-        <section>
+        {/* <section>
           <Button
             onClick={() => {
               saveChanges();
@@ -216,7 +227,7 @@ export default function CartItem({
           >
             Cancel Changes
           </Button>
-        </section>
+        </section> */}
 
       </div>
     </>

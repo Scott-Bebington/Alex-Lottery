@@ -18,6 +18,7 @@ import Login from './pages/login';
 import { initializeApp } from 'firebase/app';
 import firebaseConfig from './firebaseConfig';
 import Success from './pages/success';
+import Signup from './pages/signup';
 // import { fetchAndActivate, getRemoteConfig, getString, getValue } from 'firebase/remote-config';
 
 const app = initializeApp(firebaseConfig);
@@ -238,6 +239,14 @@ export default function Home() {
             path="/login"
             element={
               <Login
+                snackbarState={snackbarState}
+              />
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <Signup
                 snackbarState={snackbarState}
               />
             }

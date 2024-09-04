@@ -14,7 +14,7 @@ import { checkLoginError } from '../functions/errorChecking';
 import { signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { LoginProps, SnackbarMessage } from '../interfaces/interfaces';
 import firebase from 'firebase/compat/app';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 const app = initializeApp(firebaseConfig);
@@ -191,20 +191,6 @@ export default function Login({
               label="Password"
             />
           </FormControl>
-
-          <div className='flex flex-col w-96 justify-start'>
-            <Button
-              sx={{
-                padding: '0',
-                margin: '0',
-                backgroundColor: 'transparent',
-              }}
-            >
-              <Typography variant="caption" className="text-center flex items-center text-gray-400">Forgot your password?</Typography>
-            </Button>
-
-
-          </div>
         </div>
 
         <div className='w-96 flex flex-col justify-end'>
@@ -218,15 +204,7 @@ export default function Login({
           >
             {loginText}
           </Button>
-          <Button
-            sx={{
-              padding: '0',
-              margin: '0',
-              backgroundColor: 'transparent',
-            }}
-          >
-            <Typography variant="caption" className="text-center flex items-center text-gray-400">Don't have an account? Sign up</Typography>
-          </Button>
+          <Link to='/signup' className='text-gray-400 text-small'>Dont have an account? Sign up</Link>
         </div>
 
         <Divider className='w-96 text-gray-400' >

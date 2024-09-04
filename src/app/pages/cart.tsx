@@ -123,7 +123,7 @@ export default function Cart({
           className="w-1/4 p-small overflow-y-auto bg-white mr-small mb-small rounded"
           style={{ maxHeight: "calc(100vh - 9rem)", alignItems: "flex-start" }}
         >
-          <Typography variant="h4" className="text-center">Total: ${calculateTotal()}</Typography>
+          <Typography variant="h4" className="text-center">Total: {calculateTotal()} €</Typography>
           <Button
             onClick={async () => {
 
