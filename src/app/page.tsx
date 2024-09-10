@@ -69,30 +69,6 @@ export default function Home() {
    */
   useEffect(() => {
     if (initialRender.current === false) {
-      // const remoteConfig = getRemoteConfig(app);
-      // remoteConfig.settings.minimumFetchIntervalMillis = 3600000;
-      // const getStripeSecretKey = async () => {
-      //   try {
-      //     fetchAndActivate(remoteConfig)
-      //       .then(() => {
-      //         const stripeSecretKey = getString(remoteConfig, 'STRIPE_SECRET_KEY');
-
-
-      //         console.log("Stripe secret key: ", stripeSecretKey);
-      //         return stripeSecretKey;
-      //       })
-      //       .catch((error) => {
-      //         console.error('Error fetching Remote Config:', error);
-      //       });
-
-      //   } catch (error) {
-      //     console.error('Error fetching Remote Config:', error);
-      //     throw error;
-      //   }
-      // }
-
-      // getStripeSecretKey();
-
       try {
         const getAllData = async () => {
           await getAllXmasTickets(setXmasTickets, setXmasTicketsLoaded, setXmasFilteredTickets);

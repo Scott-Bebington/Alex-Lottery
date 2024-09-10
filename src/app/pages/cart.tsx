@@ -8,7 +8,7 @@ import Footer from '../components/footer';
 import Navbar from '../components/navbar';
 
 import { CartProps, SnackbarMessage } from '../interfaces/interfaces';
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { initializeApp } from "firebase/app";
 import firebaseConfig from "../firebaseConfig";
 import { getAuth } from "firebase/auth";
@@ -35,7 +35,7 @@ export default function Cart({
 }: CartProps) {
   const navigate = useNavigate();
   useEffect(() => {
-
+    console.log("Cart page loaded");
     if (!auth.currentUser) {
       let infoMesssage: SnackbarMessage = {
         message: "You must be logged in to view your cart",
@@ -44,6 +44,9 @@ export default function Cart({
       };
       let openSnackbar = handleSnackbarOpen(infoMesssage.message, 'info');
       openSnackbar();
+      if (window.localStorage.getItem('redirectAfterLogin')) {
+        window.localStorage.removeItem('redirectAfterLogin');
+      }
       window.localStorage.setItem('redirectAfterLogin', window.location.pathname);
       navigate("/login");
     }
@@ -143,18 +146,6 @@ export default function Cart({
 
                 console.error(error.message);
               }
-
-              // let infoMesssage: SnackbarMessage = {
-              //   message: "This feature is not yet implemented",
-              //   key: 0,
-              //   status: "info"
-              // };
-              // let openSnackbar = handleSnackbarOpen(infoMesssage.message, 'info');
-              // openSnackbar();
-              // return;
-
-
-
             }}
           >
             Checkout

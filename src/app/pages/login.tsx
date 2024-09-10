@@ -38,12 +38,6 @@ export default function Login({
   const [password, setPassword] = useState<string>('');
   const [loginText, setLoginText] = useState<string>('Login');
 
-  useMemo(() => {
-    if (auth.currentUser) {
-      navigate('/');
-    }
-  }, [auth.currentUser]);
-
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -138,18 +132,10 @@ export default function Login({
   };
 
   const signOut = async () => {
-    try {
-      await auth.signOut();
-      // Handle successful sign-out (e.g., navigate to the Login page or show a success message)
-      let openSnackbar = handleSnackbarOpen('You have been signed out', 'success');
-      openSnackbar();
-      return;
-    } catch (error: Error | any) {
-      let errorMessage: SnackbarMessage = checkLoginError(error.message);
-      let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
-      openSnackbar();
-      return;
-    }
+    var redirectPath = window.localStorage.getItem('redirectAfterLogin');
+    console.log('Redirect path: ', redirectPath);
+
+    
   }
 
   return (

@@ -22,7 +22,7 @@ export default function Navbar() {
         // Get the current path and store it in local storage
         window.localStorage.setItem('currentPath', window.location.pathname);
         if (window.location.pathname === "/cart") {
-          navigate("/login");
+          // navigate("/login");
         }
       }
     });
