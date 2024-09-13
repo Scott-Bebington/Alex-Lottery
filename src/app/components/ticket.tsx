@@ -20,7 +20,7 @@ export default function Ticket(
 ) {
   return (
     <div
-      className='bg-white rounded shadow-sm'
+      className='bg-white rounded shadow-sm h-fit'
     >
       <CardMedia
         component="img"

@@ -210,8 +210,7 @@ export default function XmasDraw(
 
       <section className="flex flex-1 w-full">
         <div
-          className="w-full p-small overflow-y-auto gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
-          style={{ maxHeight: "calc(100vh - 15rem)", alignItems: "flex-start" }}
+          className="w-full p-small gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
         >
           {!ticketsLoaded ? (
             Array.from(Array(8).keys()).map((_, index) => (
