@@ -1,6 +1,6 @@
 "use client";
 import { CardActionArea, CardContent, Skeleton, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 
 import LotteryTicket from '../classes/lotteryTicket';
 import Footer from '../components/footer';
@@ -13,6 +13,12 @@ import { addToCart } from "../functions/cart_functions";
 import { checkErrorMessage } from "../functions/errorChecking";
 import { SnackbarMessage, XmasDrawProps } from '../interfaces/interfaces';
 import { useNavigate } from "react-router-dom";
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import firebaseConfig from "../firebaseConfig";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 export default function XmasDraw(
   {
@@ -30,6 +36,12 @@ export default function XmasDraw(
       handleSnackbarExited,
       messageInfo,
       snackPack
+    },
+    navbarProps: {
+      user,
+      setUser,
+      history,
+      setHistory
     }
   }: XmasDrawProps
 ) {
@@ -43,28 +55,21 @@ export default function XmasDraw(
   const filterByNumber = (ticket: LotteryTicket) => ticket.number.toString();
   const filterByCost = (ticket: LotteryTicket) => ticket.cost.toString();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    var redirectPath = window.localStorage.getItem('paymentSuccess') || '/';
-    window.localStorage.removeItem('paymentSuccess')
-
-    if (redirectPath === '/success') {
-      navigate('/success');
-    } else if (redirectPath === '/cart') {
-      navigate('/cart');
-    }
-  }, []);
-
   /*
   * Selected ticket state management
   */
   const [selectedTicket, setSelectedTicket] = useState<LotteryTicket | null>(null);
   const [ticketsAddedToCart, setTicketsAddedToCart] = useState<number>(0);
 
+  // #region Ticket Expand
   /*
   * Expanded state management
   */
   const [expandedState, setExpandedState] = useState<{ [key: number]: boolean }>({});
+
+  const selectTicket = (ticketNumber: number) => {
+    setSelectedTicket(xmasTickets.find(ticket => ticket.number === ticketNumber) || null);
+  }
 
   const handleExpandClick = (ticketNumber: number) => {
     setExpandedState((prevState) => ({
@@ -76,9 +81,11 @@ export default function XmasDraw(
     }));
 
     setTicketsAddedToCart(0);
-    setSelectedTicket(xmasTickets.find(ticket => ticket.number === ticketNumber) || null);
+    selectTicket(ticketNumber);
   };
+  // #endregion
 
+  // #region Ticket functions
   /*
   * Ticket adding functions
   */
@@ -109,6 +116,22 @@ export default function XmasDraw(
     if (ticketsAddedToCart === 0) {
       openSnackbar = handleSnackbarOpen("No tickets added to cart", "error");
       openSnackbar();
+      return;
+    }
+
+    const pushLocation = (location: string) => {
+      setHistory([...history, location]);
+    };
+
+    if (auth.currentUser === null) {
+      openSnackbar = handleSnackbarOpen("Please login to add tickets to cart", "info");
+      openSnackbar();
+      const urlParams = new URLSearchParams();
+      urlParams.append("execute", "addXmasTickets");
+      urlParams.append("quantity", ticketsAddedToCart.toString());
+      urlParams.append("ticketNumber", selectedTicket.number.toString());
+      pushLocation(`/?${urlParams.toString()}`);
+      navigate("/login");
       return;
     }
 
@@ -152,7 +175,49 @@ export default function XmasDraw(
     openSnackbar = handleSnackbarOpen(`Added ${ticketsAddedToCart} tickets to cart`, "success");
     openSnackbar();
   };
+  // #endregion
 
+  // #region Redirect from login and Singup
+  const [executeRedirect, setExecuteRedirect] = useState<boolean>(false);
+  const initialRender = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (initialRender.current === false) {
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.size > 0 && xmasTickets.length > 0) {
+        const execute = urlParams.get('execute');
+
+        if (execute !== "addXmasTickets") {
+          return;
+        }
+
+        const quantity = parseInt(urlParams.get('quantity')!);
+
+        const ticketNumber = parseInt(urlParams.get('ticketNumber')!);
+
+        // output the tickets to the console
+        console.log(xmasTickets);
+
+        selectTicket(ticketNumber);
+        setTicketsAddedToCart(quantity);
+        setExecuteRedirect(true);
+      }
+    }
+
+    return () => {
+      initialRender.current = true;
+    }
+  }, [xmasTickets]);
+
+  useEffect(() => {
+    if (executeRedirect && selectedTicket && ticketsAddedToCart > 0) {
+      addTicketsToCart();
+      handleExpandClick(selectedTicket.number);
+    }
+  }, [executeRedirect, selectedTicket, ticketsAddedToCart]);
+  // #endregion
+
+  // #region Ticket filtering
   /*
   * Ticket filtering
   */
@@ -176,10 +241,11 @@ export default function XmasDraw(
     );
     setFilteredTickets(filtered);
   }, [costInputValue]);
+  // #endregion
 
   return (
     <main className="min-h-screen flex flex-col">
-      <Navbar />
+      {/* <Navbar /> */}
       <Typography variant="h3" className="text-center h-12">Christmas Draw</Typography>
       <section className="h-24 gap-4 px-small w-full flex justify-center">
         <TicketFilter

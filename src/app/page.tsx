@@ -19,6 +19,9 @@ import { initializeApp } from 'firebase/app';
 import firebaseConfig from './firebaseConfig';
 import Success from './pages/success';
 import Signup from './pages/signup';
+import Navbar from './components/navbar';
+import Profile from './pages/profile';
+import Footer from './components/footer';
 // import { fetchAndActivate, getRemoteConfig, getString, getValue } from 'firebase/remote-config';
 
 const app = initializeApp(firebaseConfig);
@@ -32,6 +35,7 @@ export default function Home() {
    * User state management
    */
   const [user, setUser] = useState(null);
+  const [history, setHistory] = useState<string[]>([]);
 
   /*
     * Snackbar state management
@@ -70,9 +74,11 @@ export default function Home() {
   useEffect(() => {
     if (initialRender.current === false) {
       try {
+
+
+
         const getAllData = async () => {
           await getAllXmasTickets(setXmasTickets, setXmasTicketsLoaded, setXmasFilteredTickets);
-          // await getCart(setCart, setCartLoaded);
         }
 
         getAllData();
@@ -171,9 +177,22 @@ export default function Home() {
     snackPack
   };
 
+  const navbarProps = {
+    user,
+    setUser,
+    history,
+    setHistory
+  };
+
   return (
     <>
       <Router>
+        <Navbar
+          user={user}
+          setUser={setUser}
+          history={history}
+          setHistory={setHistory}
+        />
         <Routes>
           <Route
             path="/"
@@ -186,6 +205,7 @@ export default function Home() {
                 cart={cart}
                 setCart={setCart}
                 snackbarState={snackbarState}
+                navbarProps={navbarProps}
               />
             }
           />
@@ -238,7 +258,14 @@ export default function Home() {
               </div>
             }
           />
+          <Route 
+            path="/profile" 
+            element={
+              <Profile />
+            }
+          />
         </Routes>
+        <Footer />
       </Router>
       <CustomSnackbar
         snackbarOpen={snackbarOpen}

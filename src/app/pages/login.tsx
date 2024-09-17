@@ -7,7 +7,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 
 // firebase.js
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { fetchSignInMethodsForEmail, getAuth, linkWithPopup } from "firebase/auth";
 import firebaseConfig from "@/app/firebaseConfig";
 import { checkLoginError } from '../functions/errorChecking';
 
@@ -31,7 +31,6 @@ export default function Login({
     snackPack
   }
 }: LoginProps) {
-  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
@@ -88,12 +87,6 @@ export default function Login({
     try {
       setLoginText('Logging in...');
       await firebaseSignInWithEmailAndPassword(auth, email, password);
-      var redirectPath = window.localStorage.getItem('redirectAfterLogin') || '/';
-      window.localStorage.removeItem('redirectAfterLogin');
-      if (redirectPath === '/login') {
-        redirectPath = '/';
-      }
-      navigate(redirectPath);
     } catch (error: Error | any) {
       let errorMessage: SnackbarMessage = checkLoginError(error.message);
       let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
@@ -106,17 +99,22 @@ export default function Login({
   const handleSignInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+
+      // try to link to an existing account with an email provider if possible
+      const email = result.user.email!;
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+
+      if (methods.includes('password')) {
+        console.log('Email provider exists');
+        return;
+      }
+
+      console.log('Email provider does not exist');
+
 
       let openSnackbar = handleSnackbarOpen('You have been signed in with Google', 'success');
       openSnackbar();
-
-      var redirectPath = window.localStorage.getItem('redirectAfterLogin') || '/';
-      window.localStorage.removeItem('redirectAfterLogin');
-      if (redirectPath === '/login') {
-        redirectPath = '/';
-      }
-      navigate(redirectPath);
     } catch (error: Error | any) {
 
       if (error.code === 'Firebase: Error (auth/cancelled-popup-request).') {
@@ -130,17 +128,17 @@ export default function Login({
       return;
     }
   };
+  
 
   const signOut = async () => {
     var redirectPath = window.localStorage.getItem('redirectAfterLogin');
     console.log('Redirect path: ', redirectPath);
 
-    
+
   }
 
   return (
     <main className="min-h-screen flex flex-col justify-between">
-      <Navbar />
 
       <section className="flex flex-1 gap-4 flex-col w-full items-center justify-center">
         <Typography variant="h5" className="text-center flex items-center px-small font-bold h-12">Login</Typography>

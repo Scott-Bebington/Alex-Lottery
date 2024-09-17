@@ -76,7 +76,6 @@ export default function Cart({
 
   return (
     <main className="min-h-screen flex flex-col justify-between">
-      <Navbar />
       <Typography variant="h5" className="text-center flex items-center px-small font-bold h-12">Your Cart</Typography>
       <section className="flex flex-1 w-full">
         <div

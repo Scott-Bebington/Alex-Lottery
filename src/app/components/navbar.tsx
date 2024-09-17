@@ -5,23 +5,26 @@ import { AppBar, Avatar, Box, Button, Container, Divider, Drawer, IconButton, Li
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 // import { pages } from "next/dist/build/templates/app-page";
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import firebaseConfig from '../firebaseConfig';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import LocalActivityOutlinedIcon from '@mui/icons-material/LocalActivityOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import { Spa } from '@mui/icons-material';
+import { NavbarProps } from '../interfaces/interfaces';
 
 const pages = ['Xmas Draw', 'Kids Draw', 'Cart', 'Success'];
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-export default function Navbar() {
-  const [user, setUser] = useState<User | null>(null);
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+export default function Navbar({
+  user,
+  setUser,
+  history,
+  setHistory
+}: NavbarProps) {
 
   const [open, setOpen] = React.useState(false);
 
@@ -64,38 +67,38 @@ export default function Navbar() {
     </Box>
   );
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
 
   const navigate = useNavigate();
 
+  const pushLocation = (location: string) => {
+    setHistory([...history, location]);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+
       if (user) {
         setUser(user);
+        if (history.length > 0) {
+          navigate(history[history.length - 1]);
+        } else {
+          navigate("/");
+        }
       } else {
-        // Get the current path and store it in local storage
-        window.localStorage.setItem('currentPath', window.location.pathname);
-        if (window.location.pathname === "/cart") {
-          // navigate("/login");
+        if (history.length > 0 && history[history.length - 1] === "/cart") {
+          navigate("/login");
+        }
+
+        if (history.length > 0 && history[history.length - 1] === "/login") {
+          navigate("/");
         }
       }
+
+
     });
 
     return () => unsubscribe(); // Cleanup subscription on unmount
-  }, []);
+  }, [history]);
 
   return (
     <AppBar position="sticky" className='h-12 w-full shadow-sm' sx={{ backgroundColor: "" }}>
@@ -104,30 +107,36 @@ export default function Navbar() {
       </Drawer>
 
       <div className='hidden lg:block'>
-        <div className='h-12 flex items-center justify-between'>
+        <div className='h-12 flex items-center justify-between px-2'>
           <img src="/images/General/Logo.jpg" alt="logo" width={50} height={50} />
           <ul className="flex space-x-4">
             <li>
-              <Link to="/">Xmas Draw</Link>
+              <Link to="/" onClick={() => pushLocation("/")}>Xmas Draw</Link>
             </li>
             <li>
-              <Link to="/kids">Kids Draw</Link>
+              <Link to="/kids" onClick={() => pushLocation("/kids")}>Kids Draw</Link>
             </li>
             <li>
-              <Link to="/cart">Cart</Link>
+              <Link to="/cart" onClick={() => pushLocation("/cart")}>Cart</Link>
             </li>
+
+            <li>
+              <Link to="/success" onClick={() => pushLocation("/success")}>Success</Link>
+            </li>
+          </ul>
+          <ul className="flex space-x-4">
             {user ? (
               <>
                 <li>
-                  <span>{user.displayName}</span>
+                  <Link to="/profile">{user.displayName}</Link>
                 </li>
                 <li>
-                  <Button
-                    size="small"
+                  <Typography
+                    sx={{ cursor: "pointer" }}
                     onClick={async () => {
                       try {
                         await auth.signOut();
-
+                        setUser(null);
                         return;
                       } catch (error: Error | any) {
                         console.error(error.message);
@@ -136,20 +145,27 @@ export default function Navbar() {
                     }}
                   >
                     Logout
-                  </Button>
+                  </Typography>
                 </li>
               </>
 
             ) : (
-              <li>
-                <Link to="/login">Login</Link>
-              </li>
+              <>
+                <li>
+                  <Link to="/login">Login</Link>
+                </li>
+                <Typography>/</Typography>
+                <li>
+                  <Link to="/signup">Sign up</Link>
+                </li>
+              </>
+
             )}
-            <li>
-              <Link to="/success">Success</Link>
-            </li>
           </ul>
+
+
         </div>
+
 
       </div>
 

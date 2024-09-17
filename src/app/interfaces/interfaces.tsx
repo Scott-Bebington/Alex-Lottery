@@ -1,6 +1,7 @@
 import { SnackbarCloseReason } from "@mui/material";
 import LotteryTicket from "../classes/lotteryTicket";
 
+// #region Global Interfaces
 /**
  * Global interfaces used by every component
  * @interface SnackbarMessage
@@ -48,7 +49,9 @@ export interface TicketFilterProps {
     inputValue: string;
     getOptionLabel: (ticket: LotteryTicket) => string | number | string[];
 }
+// #endregion
 
+// #region XmasDrawProps
 /**
  * Xmas props used by the Xmas page
  * @interface XmasDrawProps
@@ -63,8 +66,11 @@ export interface XmasDrawProps {
     cart: LotteryTicket[];
     setCart: (cart: LotteryTicket[]) => void;
     snackbarState: SnackBarStateHandler;
+    navbarProps: NavbarProps;
 }
+// #endregion
 
+// #region KidsDrawProps
 /**
  * Kids props used by the Kids page
  * @interface KidsDrawProps
@@ -76,7 +82,9 @@ export interface KidsDrawProps {
     cart: LotteryTicket[];
     setCart: (cart: LotteryTicket[]) => void;
 }
+// #endregion
 
+// #region CartProps
 /**
  * Cart Props used by the CartItem component and the Cart component
  * @interface CartItemProps
@@ -97,7 +105,9 @@ export interface CartProps {
     cartLoaded: boolean;
     snackbarState: SnackBarStateHandler;
 }
+// #endregion
 
+// #region ActionButtonProps
 /**
  * ActionButtonProps used by the ActionButton component
  * @interface ActionButtonProps
@@ -114,7 +124,9 @@ export interface ActionButtonProps {
     hoverColour?: string;
     hoverBackgroundColour?: string;
 }
+// #endregion
 
+// #region SnackbarProps
 /**
  * Snackbar props used by the Snackbar component
  * @interface SnackbarProps
@@ -129,7 +141,9 @@ export interface SnackbarProps {
     snackbarKey: number;
     status: string;
 }
+// #endregion
 
+// #region LoginProps
 /**
  * Login props used by the Login page
  * @interface LoginProps
@@ -138,7 +152,9 @@ export interface SnackbarProps {
 export interface LoginProps {
     snackbarState: SnackBarStateHandler;
 }
+// #endregion
 
+// #region SuccessProps
 /**
  * Payment success props used by the Success page
  * @interface SuccessProps
@@ -148,8 +164,21 @@ export interface SuccessProps {
     cart: LotteryTicket[];
     setCart: (cart: LotteryTicket[]) => void;
 }
+// #endregion
 
-
+// #region NavbarProps
+/**
+ * Navbar props used by the Navbar component
+ * @interface NavbarProps
+ * @exports NavbarProps
+ */
+export interface NavbarProps {
+    user: any;
+    setUser: (user: any) => void;
+    history: string[];
+    setHistory: (history: string[]) => void;
+}
+// #endregion
 
 
 

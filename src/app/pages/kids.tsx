@@ -198,7 +198,6 @@ export default function KidsDraw({
 
     return (
         <main className="min-h-screen flex flex-col">
-            <Navbar />
             <Typography variant="h3" className="text-center h-12">Kids Draw</Typography>
             <section className="h-24 gap-4 px-small w-full flex justify-center">
                 <TicketFilter

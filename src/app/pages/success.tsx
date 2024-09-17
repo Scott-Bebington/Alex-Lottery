@@ -43,7 +43,6 @@ export default function Success({
 
   return (
     <main className="min-h-screen flex flex-col justify-between">
-      <Navbar />
       <section>
         <h1 className="text-3xl text-center font-semibold mt-8">Payment Successful</h1>
         <p className="text-center mt-4">Thank you for your purchase!</p>

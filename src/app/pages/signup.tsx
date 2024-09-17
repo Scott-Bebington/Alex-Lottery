@@ -7,7 +7,7 @@ import Navbar from '../components/navbar';
 // firebase.js
 import firebaseConfig from "@/app/firebaseConfig";
 import { initializeApp } from "firebase/app";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, updateProfile } from "firebase/auth";
 import { checkLoginError } from '../functions/errorChecking';
 
 import { Link, useNavigate } from 'react-router-dom';
@@ -29,7 +29,6 @@ export default function Signup({
         snackPack
     }
 }: LoginProps) {
-    const navigate = useNavigate();
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [name, setName] = useState<string>('');
@@ -37,12 +36,6 @@ export default function Signup({
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [signupText, setsignupText] = useState<string>('Create Account');
-
-    useMemo(() => {
-        if (auth.currentUser) {
-            navigate('/');
-        }
-    }, [auth.currentUser]);
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -105,18 +98,24 @@ export default function Signup({
         try {
             setsignupText('Creating your account...');
             await createUserWithEmailAndPassword(auth, email, password);
+            // set the display name of the user
+            await updateProfile(auth.currentUser!, {
+                displayName: name + ' ' + surname
+            });
         } catch (error: Error | any) {
             let errorMessage: SnackbarMessage = checkLoginError(error.message);
             let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
             openSnackbar();
+            return;
         }
 
         setsignupText('Create Account');
+        let openSnackbar = handleSnackbarOpen('Account created successfully', 'success');
+        openSnackbar();
     };
 
     return (
         <main className="min-h-screen flex flex-col justify-between">
-            <Navbar />
 
             <section className="flex flex-1 gap-4 flex-col w-full items-center justify-center">
                 <Typography variant="h5" className="text-center flex items-center px-small font-bold h-12">Create your account</Typography>
