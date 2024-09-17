@@ -46,8 +46,6 @@ export const createCheckoutSession = async () => {
 
     await fetchAndActivate(remoteConfig)
     const stripeSecretKey = getString(remoteConfig, 'STRIPE_SECRET_KEY');
-
-    console.log(stripeSecretKey);
     const stripe = require('stripe')(stripeSecretKey);
 
     const session = await stripe.checkout.sessions.create({

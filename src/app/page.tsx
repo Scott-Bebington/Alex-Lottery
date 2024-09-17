@@ -22,6 +22,8 @@ import Signup from './pages/signup';
 import Navbar from './components/navbar';
 import Profile from './pages/profile';
 import Footer from './components/footer';
+import { getUserDetails } from './functions/profile_functions';
+import UserData from './classes/userData';
 // import { fetchAndActivate, getRemoteConfig, getString, getValue } from 'firebase/remote-config';
 
 const app = initializeApp(firebaseConfig);
@@ -35,6 +37,8 @@ export default function Home() {
    * User state management
    */
   const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userDataLoaded, setUserDataLoaded] = useState<boolean>(false);
   const [history, setHistory] = useState<string[]>([]);
 
   /*
@@ -65,6 +69,7 @@ export default function Home() {
   const [cartLoaded, setCartLoaded] = useState<boolean>(false);
   const initialRender = useRef<boolean>(false);
 
+
   /**
    * Get all data on initial render
    * 1. Xmas tickets
@@ -74,9 +79,6 @@ export default function Home() {
   useEffect(() => {
     if (initialRender.current === false) {
       try {
-
-
-
         const getAllData = async () => {
           await getAllXmasTickets(setXmasTickets, setXmasTicketsLoaded, setXmasFilteredTickets);
         }
@@ -93,7 +95,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-
     if (!auth.currentUser) {
       return;
     }
@@ -101,6 +102,7 @@ export default function Home() {
     try {
       const getAllData = async () => {
         await getCart(setCart, setCartLoaded);
+        await getUserDetails(setUserData, setUserDataLoaded);
       }
       getAllData();
     } catch (error: Error | any) {
@@ -261,7 +263,10 @@ export default function Home() {
           <Route 
             path="/profile" 
             element={
-              <Profile />
+              <Profile 
+                userData={userData}
+                setUserData={setUserData}
+              />
             }
           />
         </Routes>

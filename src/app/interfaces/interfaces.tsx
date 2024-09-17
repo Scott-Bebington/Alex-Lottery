@@ -1,5 +1,6 @@
 import { SnackbarCloseReason } from "@mui/material";
 import LotteryTicket from "../classes/lotteryTicket";
+import UserData from "../classes/userData";
 
 // #region Global Interfaces
 /**
@@ -180,5 +181,16 @@ export interface NavbarProps {
 }
 // #endregion
 
+// #region ProfileProps
+/**
+ * Profile props used by the Profile page
+ * @interface ProfileProps
+ * @exports ProfileProps
+ */
+export interface ProfileProps {
+    userData: UserData | null;
+    setUserData: (userData: UserData) => void;
+}
+// #endregion
 
 

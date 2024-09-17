@@ -5,27 +5,46 @@ import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSn
 import LotteryTicket from "../classes/lotteryTicket";
 import { Stripe } from "stripe";
 import { createCheckoutSession } from "./stripe";
+import UserData from "../classes/userData";
 
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
 const auth = getAuth(app);
 
 /**
- * Retrieves the user's cart from the database.
+ * Retrieves the user's information from the database.
  * 
- * @param setCart - A function to update the cart.
- * @param setCartLoaded - A function to update the cartLoaded state.
+ * @param setUserDetails - A function to update the cart.
+ * @param setUserDetailsLoaded - A function to update the cartLoaded state.
  * 
  * @returns void
  * 
  */
-export async function getCart(
-) {
+export async function getUserDetails(setUserDetails: (userDetails: any) => void, setUserDetailsLoaded: (userDetailsLoaded: boolean) => void) {
 
   if (auth.currentUser === null) {
     throw new Error("User is not logged in");
   }
 
+  const userUID = auth.currentUser.uid!;
+
+  const userRef = doc(collection(firestore, "users"), userUID);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    console.log("User does not exist");
+    return;
+  }
+
+  const userData: UserData = new UserData(
+    userDoc.data().name,
+    userDoc.data().surname,
+    userDoc.data().email,
+    userDoc.data().phone,
+    userDoc.data().profileImage,
+  );
+
+  setUserDetails(userData);
   
 }
 
@@ -50,7 +69,7 @@ export async function addPurchases(cart: LotteryTicket[]) {
   for (const ticket of cart) {
     const userUID = auth.currentUser.uid;
     const cartCollectionRef = collection(firestore, "users", userUID, "Purchases");
-    await addDoc(cartCollectionRef, {
+    await addDoc(collection(firestore, "users", userUID, "Purchases"), {
         ticketNum: ticket.number,
         cost: ticket.cost,
         type: ticket.type,
