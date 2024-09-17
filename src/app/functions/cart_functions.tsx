@@ -276,6 +276,9 @@ export async function checkout() {
     return;
   }
 
+  // create a cookie with the name 'redirectToSuccess' and the value 'true'
+  document.cookie = "redirectToSuccess=true";
+
   const session = await createCheckoutSession();
 
   console.log(session.url);

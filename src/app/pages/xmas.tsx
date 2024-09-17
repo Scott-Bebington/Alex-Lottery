@@ -244,7 +244,7 @@ export default function XmasDraw(
   // #endregion
 
   return (
-    <main className="min-h-screen flex flex-col">
+    <main className="flex flex-col" style={{ minHeight: "calc(100vh - 6rem)" }}>
       {/* <Navbar /> */}
       <Typography variant="h3" className="text-center h-12">Christmas Draw</Typography>
       <section className="h-24 gap-4 px-small w-full flex justify-center">

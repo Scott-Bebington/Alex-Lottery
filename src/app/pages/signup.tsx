@@ -12,10 +12,12 @@ import { checkLoginError } from '../functions/errorChecking';
 
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginProps, SnackbarMessage } from '../interfaces/interfaces';
+import { addDoc, collection, doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
 
 
 
 const app = initializeApp(firebaseConfig);
+const firestore = getFirestore(app);
 const auth = getAuth(app);
 
 export default function Signup({
@@ -95,13 +97,31 @@ export default function Signup({
             return;
         }
 
+
+
         try {
             setsignupText('Creating your account...');
+
+
+
+
             await createUserWithEmailAndPassword(auth, email, password);
+            await setDoc(doc(firestore, 'users', auth.currentUser!.uid),
+                {
+                    email: email,
+                    name: name,
+                    surname: surname
+                },
+                { merge: true }
+            );
+
+
             // set the display name of the user
             await updateProfile(auth.currentUser!, {
                 displayName: name + ' ' + surname
             });
+
+
         } catch (error: Error | any) {
             let errorMessage: SnackbarMessage = checkLoginError(error.message);
             let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');

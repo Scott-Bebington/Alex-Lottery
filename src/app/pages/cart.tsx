@@ -75,7 +75,7 @@ export default function Cart({
   };
 
   return (
-    <main className="min-h-screen flex flex-col justify-between">
+    <main className="flex flex-col" style={{ minHeight: "calc(100vh - 6rem)" }}>
       <Typography variant="h5" className="text-center flex items-center px-small font-bold h-12">Your Cart</Typography>
       <section className="flex flex-1 w-full">
         <div
@@ -105,7 +105,9 @@ export default function Cart({
             ))
           ) : (
             cart.length === 0 ? (
-              <Typography variant="h5" className="text-center">Your cart is empty</Typography>
+              <div className="flex items-center justify-center" style={{ height: "calc(100% - 2rem)" }}>
+                <Typography variant="h5" className="text-center">Your cart is empty</Typography>
+              </div>
             ) : (
               cart.map((ticket: LotteryTicket) => (
                 <CartItem
@@ -151,10 +153,6 @@ export default function Cart({
           </Button>
         </aside>
       </section>
-
-      <Footer />
-
-
     </ main>
   );
 }

@@ -26,6 +26,9 @@ export default function Success({
         try {
           await addPurchases(cart);
           await clearCart(setCart);
+
+          // delete the redirectToSuccess cookie
+          document.cookie = "redirectToSuccess=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         } catch (error) {
           console.error(error);
         }

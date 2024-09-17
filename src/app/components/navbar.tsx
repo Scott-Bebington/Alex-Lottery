@@ -67,6 +67,10 @@ export default function Navbar({
     </Box>
   );
 
+  const showHistory = () => {
+    console.log(history);
+  };
+
 
   const navigate = useNavigate();
 
@@ -75,6 +79,10 @@ export default function Navbar({
   };
 
   useEffect(() => {
+
+    console.log("Navbar loaded");
+    console.log("Current path: ", window.location.pathname);
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
 
       if (user) {
@@ -82,7 +90,11 @@ export default function Navbar({
         if (history.length > 0) {
           navigate(history[history.length - 1]);
         } else {
-          navigate("/");
+          if (document.cookie.includes("redirectToSuccess=true")) {
+            navigate("/success");
+          } else {
+            navigate("/");
+          }
         }
       } else {
         if (history.length > 0 && history[history.length - 1] === "/cart") {
@@ -147,6 +159,7 @@ export default function Navbar({
                     Logout
                   </Typography>
                 </li>
+                <Typography sx={{ cursor: "pointer" }} onClick={() => showHistory()}>Show History</Typography>
               </>
 
             ) : (
@@ -158,6 +171,7 @@ export default function Navbar({
                 <li>
                   <Link to="/signup">Sign up</Link>
                 </li>
+
               </>
 
             )}
