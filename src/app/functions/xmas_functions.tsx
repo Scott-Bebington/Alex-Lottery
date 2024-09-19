@@ -8,12 +8,12 @@ const firestore = getFirestore(app);
 
 // Function to get all tickets from the Xmas_Draw collection
 export async function getAllXmasTickets(setXmasTickets: (tickets: LotteryTicket[]) => void, setTicketsFetched: (fetched: boolean) => void, setFilteredTickets: (tickets: LotteryTicket[]) => void) {
-    
+
     // console.log("Getting Xmas tickets in function 'getAllXmasTickets'");
 
     const XmasDrawCollection = collection(firestore, "Xmas_Draw");
 
-    onSnapshot(XmasDrawCollection, (snapshot) => {
+    const unsubscribe = onSnapshot(XmasDrawCollection, (snapshot) => {
         const tickets: LotteryTicket[] = [];
         for (const doc of snapshot.docs) {
             const ticket = doc.data();
@@ -33,4 +33,6 @@ export async function getAllXmasTickets(setXmasTickets: (tickets: LotteryTicket[
         setFilteredTickets(tickets);
         setTicketsFetched(true);
     });
+
+    return unsubscribe;
 }

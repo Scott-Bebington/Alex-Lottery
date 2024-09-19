@@ -80,9 +80,6 @@ export default function Navbar({
 
   useEffect(() => {
 
-    console.log("Navbar loaded");
-    console.log("Current path: ", window.location.pathname);
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
 
       if (user) {

@@ -5,6 +5,7 @@ import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSn
 import LotteryTicket from "../classes/lotteryTicket";
 import { Stripe } from "stripe";
 import { createCheckoutSession } from "./stripe";
+import { CastConnectedSharp } from "@mui/icons-material";
 
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
@@ -39,7 +40,7 @@ export async function getCart(
     return;
   }
 
-  onSnapshot(cart, (snapshot) => {
+  const unsubscribe = onSnapshot(cart, (snapshot) => {
     const cartItems: LotteryTicket[] = [];
     snapshot.forEach((doc) => {
       const ticketData = doc.data();
@@ -58,6 +59,8 @@ export async function getCart(
     setCart(cartItems);
     setCartLoaded(true);
   });
+
+  return unsubscribe;
 }
 
 export async function getTicket(ticketID: string, ticketType: string, setTicketsLeft: (ticketsLeft: number) => void) {
@@ -65,12 +68,15 @@ export async function getTicket(ticketID: string, ticketType: string, setTickets
   const ticket = doc(collection(firestore, ticketType), ticketID);
   // const ticketSnapshot = await getDoc(ticket);
 
-  onSnapshot(ticket, (snapshot) => {
+  const unsubscribe = onSnapshot(ticket, (snapshot) => {
     const ticketData = snapshot.data();
 
     setTicketsLeft(ticketData?.quantity);
 
   });
+
+  return unsubscribe;
+
 }
 
 /**

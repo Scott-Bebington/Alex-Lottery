@@ -39,7 +39,7 @@ export async function getUserDetails(setUserDetails: (userDetails: any) => void,
   // Listen to real-time updates on the PendingCollection subcollection
   const pendingCollectionRef = collection(userRef, "PendingCollection");
 
-  onSnapshot(pendingCollectionRef, (snapshot) => {
+  const unsubscribe = onSnapshot(pendingCollectionRef, (snapshot) => {
     if (snapshot.empty) {
       console.log("No pending purchases found.");
       return;
@@ -85,6 +85,10 @@ export async function getUserDetails(setUserDetails: (userDetails: any) => void,
     console.error("Error listening to pending collection:", error);
     setUserDetailsLoaded(false); // Handle error in loading
   });
+
+  // Return unsubscribe function to stop listening to changes when the component unmounts
+  return unsubscribe;
+
 }
 
 export async function checkout() {
