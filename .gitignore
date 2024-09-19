@@ -37,3 +37,6 @@ next-env.d.ts
 
 # DB design
 .drawio
+
+# the entire functions folder and all its contents
+functions/

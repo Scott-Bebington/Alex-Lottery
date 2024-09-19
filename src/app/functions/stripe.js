@@ -56,6 +56,7 @@ export const createCheckoutSession = async () => {
             quantity: item.quantity,
         })),
         mode: 'payment',
+        client_reference_id: auth.currentUser.uid,
     });
 
     return session;

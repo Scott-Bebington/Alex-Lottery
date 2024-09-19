@@ -140,7 +140,8 @@ export async function checkout() {
   const session = await createCheckoutSession();
 
   console.log(session.url);
-  window.open(session.url!);
+  // window.open(session.url!);
+  window.location.href = session.url!;
 
 
 }

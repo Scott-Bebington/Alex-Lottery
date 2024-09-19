@@ -24,8 +24,8 @@ export default function Success({
 
       const runPostPurchaseCleanup = async () => {
         try {
-          await addPurchases(cart);
-          await clearCart(setCart);
+          // await addPurchases(cart);
+          // await clearCart(setCart);
 
           // delete the redirectToSuccess cookie
           document.cookie = "redirectToSuccess=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
