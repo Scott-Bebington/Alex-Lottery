@@ -9,6 +9,8 @@ class UserData {
   name: string;
   surname: string;
   email: string;
+  emailLink: boolean;
+  googleLink: boolean;
   phone?: string;
   profilePicture?: string;
   PendingCollection?: PendingCollection[];
@@ -18,6 +20,8 @@ class UserData {
     name: string,
     surname: string,
     email: string,
+    emailLink: boolean,
+    googleLink: boolean,
     phone?: string,
     profilePicture?: string,
     PendingCollection?: PendingCollection[],
@@ -26,6 +30,8 @@ class UserData {
     this.name = name;
     this.surname = surname;
     this.email = email;
+    this.emailLink = emailLink;
+    this.googleLink = googleLink;
     this.phone = phone;
     this.profilePicture = profilePicture;
     this.PendingCollection = PendingCollection;

@@ -1,7 +1,7 @@
 import firebaseConfig from "@/app/firebaseConfig";
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, runTransaction, setDoc } from "firebase/firestore";
+import { AuthError, EmailAuthProvider, getAuth, GoogleAuthProvider, linkWithCredential, linkWithPopup } from "firebase/auth";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, runTransaction, setDoc, updateDoc } from "firebase/firestore";
 import LotteryTicket from "../classes/lotteryTicket";
 import { Stripe } from "stripe";
 import { createCheckoutSession } from "./stripe";
@@ -42,6 +42,18 @@ export async function getUserDetails(setUserDetails: (userDetails: any) => void,
   const unsubscribe = onSnapshot(pendingCollectionRef, (snapshot) => {
     if (snapshot.empty) {
       console.log("No pending purchases found.");
+      const userData: UserData = new UserData(
+        userDoc.data().name,
+        userDoc.data().surname,
+        userDoc.data().email,
+        userDoc.data().emailLink,
+        userDoc.data().googleLink,
+        userDoc.data().phone,
+        userDoc.data().profileImage
+      );
+
+      setUserDetails(userData);
+      setUserDetailsLoaded(true);
       return;
     }
 
@@ -74,13 +86,15 @@ export async function getUserDetails(setUserDetails: (userDetails: any) => void,
       userDoc.data().name,
       userDoc.data().surname,
       userDoc.data().email,
+      userDoc.data().emailLink,
+      userDoc.data().googleLink,
       userDoc.data().phone,
       userDoc.data().profileImage,
       pendingCollectionData
     );
 
     setUserDetails(userData);
-    setUserDetailsLoaded(true); // Mark user details as loaded once we have the data
+    setUserDetailsLoaded(true);
   }, (error) => {
     console.error("Error listening to pending collection:", error);
     setUserDetailsLoaded(false); // Handle error in loading
@@ -117,3 +131,106 @@ export async function checkout() {
 
 
 }
+
+export async function linkGoogleToEmailProvider() {
+  try {
+
+    if (auth.currentUser === null) {
+      throw new Error('No user signed in.');
+      return;
+    }
+    // Sign in with email/password
+    // const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    // const user = userCredential.user;
+
+    const userUID = auth.currentUser.uid!;
+    const userRef = doc(collection(firestore, "users"), userUID);
+    const userDoc = await getDoc(userRef);
+
+    if (!userDoc.exists()) {
+      console.log("User does not exist");
+      return;
+    }
+
+    const user = auth.currentUser;
+
+    // If the user exists, create a GoogleAuthProvider instance
+    const googleProvider = new GoogleAuthProvider();
+
+    // Link Google provider to the signed-in user
+    const linkedCredential = await linkWithPopup(user, googleProvider);
+
+    console.log("Google account successfully linked to existing email provider.");
+    console.log(linkedCredential);
+
+    // You can now access the linked Google credentials if needed
+    const linkedUser = linkedCredential.user;
+    console.log("Linked User:", linkedUser);
+
+    await updateDoc(userRef, {
+      googleLink: true,
+      emailLink: true,
+    });
+
+  } catch (error: AuthError | any) {
+    console.error("Error linking Google provider:", error);
+    if (error.code === 'auth/credential-already-in-use') {
+      // Handle case where the Google account is already linked to another account
+      console.error("This Google account is already linked with another user.");
+    } else {
+      console.error("Something went wrong while linking:", error.message);
+    }
+  }
+};
+
+// Function to link email/password provider to a Google-signed-in user
+export async function linkEmailToGoogleProvider(email: string, password: string) {
+  try {
+
+    if (auth.currentUser === null) {
+      throw new Error('No user signed in.');
+      return;
+    }
+
+    const userUID = auth.currentUser.uid!;
+    const userRef = doc(collection(firestore, "users"), userUID);
+    const userDoc = await getDoc(userRef);
+
+    if (!userDoc.exists()) {
+      console.log("User does not exist");
+      return;
+    }
+
+    const user = auth.currentUser;
+
+    console.log('User signed in with Google:', user);
+
+    // Create an EmailAuthProvider credential using the provided email and password
+    const emailCredential = EmailAuthProvider.credential(email, password);
+
+    // Link the email/password credential to the Google-signed-in user
+    const linkedCredential = await linkWithCredential(user, emailCredential);
+
+    console.log('Email/password account successfully linked to Google provider.');
+    console.log(linkedCredential);
+
+    // You can now access the linked email credentials if needed
+    const linkedUser = linkedCredential.user;
+    console.log('Linked User:', linkedUser);
+
+    await updateDoc(userRef, {
+      googleLink: true,
+      emailLink: true,
+    });
+
+  } catch (error: AuthError | any) {
+    console.error('Error linking email/password provider:', error);
+    if (error.code === 'auth/email-already-in-use') {
+      // Handle case where the email is already linked with another account
+      console.error('This email is already linked to another account.');
+    } else {
+      console.error('Something went wrong while linking:', error.message);
+    }
+  }
+};
+

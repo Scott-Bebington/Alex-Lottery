@@ -115,7 +115,8 @@ export default function Navbar({
         {DrawerList}
       </Drawer>
 
-      <div className='hidden lg:block'>
+      {/* <div className='hidden lg:block'> */}
+      <div>
         <div className='h-12 flex items-center justify-between px-2'>
           <img src="/images/General/Logo.jpg" alt="logo" width={50} height={50} />
           <ul className="flex space-x-4">
@@ -128,7 +129,6 @@ export default function Navbar({
             <li>
               <Link to="/cart" onClick={() => pushLocation("/cart")}>Cart</Link>
             </li>
-
             <li>
               <Link to="/success" onClick={() => pushLocation("/success")}>Success</Link>
             </li>
@@ -156,7 +156,6 @@ export default function Navbar({
                     Logout
                   </Typography>
                 </li>
-                <Typography sx={{ cursor: "pointer" }} onClick={() => showHistory()}>Show History</Typography>
               </>
 
             ) : (
@@ -180,13 +179,13 @@ export default function Navbar({
 
       </div>
 
-      <div className='hidden md:block lg:hidden'>
+      {/* <div className='hidden md:block lg:hidden'>
         Medium
       </div>
 
       <div className='block md:hidden'>
         Small
-      </div>
+      </div> */}
 
     </AppBar>
   );

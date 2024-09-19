@@ -7,7 +7,7 @@ import Navbar from '../components/navbar';
 // firebase.js
 import firebaseConfig from "@/app/firebaseConfig";
 import { initializeApp } from "firebase/app";
-import { createUserWithEmailAndPassword, getAuth, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, sendEmailVerification, updateProfile } from "firebase/auth";
 import { checkLoginError } from '../functions/errorChecking';
 
 import { Link, useNavigate } from 'react-router-dom';
@@ -101,19 +101,19 @@ export default function Signup({
 
         try {
             setsignupText('Creating your account...');
-
-
-
-
             await createUserWithEmailAndPassword(auth, email, password);
             await setDoc(doc(firestore, 'users', auth.currentUser!.uid),
                 {
                     email: email,
                     name: name,
-                    surname: surname
+                    surname: surname,
+                    emailLink: true,
+                    googleLink: false,
                 },
                 { merge: true }
             );
+
+            console.log('User created successfully in the users table');
 
 
             // set the display name of the user
@@ -121,6 +121,9 @@ export default function Signup({
                 displayName: name + ' ' + surname
             });
 
+            console.log('User display name updated successfully');
+
+            await sendEmailVerification(auth.currentUser!);
 
         } catch (error: Error | any) {
             let errorMessage: SnackbarMessage = checkLoginError(error.message);

@@ -2,7 +2,7 @@
 
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { Button, CardContent, IconButton, Typography } from '@mui/material';
+import { Button, CardContent, FormControl, IconButton, InputLabel, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import LotteryTicket from '../classes/lotteryTicket';
 import { addToCart, getTicket, removeFromCart } from '../functions/cart_functions';
@@ -20,9 +20,9 @@ export default function CartItem({
 }: CartItemProps) {
 
   const [quantity, setQuantity] = useState<number>(ticket.quantity);
-  const [ticketsAdded, setTicketsAdded] = useState<number>(0);
   const [remainingTickets, setRemainingTickets] = useState<number>(0);
   const initialRender = useRef<boolean>(false);
+  const [dropdownDisabled, setDropdownDisabled] = useState<boolean>(false);
 
   /**
    * Fetch ticket data for this specific ticket
@@ -43,79 +43,37 @@ export default function CartItem({
     }
   }, []);
 
-  const addTickets = () => {
-    if (remainingTickets <= 0) {
-      return;
-    }
+  const handleChange = async (event: SelectChangeEvent) => {
 
-    // setRemainingTickets
-    const newTicketsAdded = ticketsAdded + 1;
-    setTicketsAdded(newTicketsAdded);
-    setQuantity(quantity + 1);
-    setRemainingTickets(remainingTickets - 1);
+    setDropdownDisabled(true);
 
-    const newCart: LotteryTicket[] = cart.map((cartTicket) => {
-      if (cartTicket.ticketID === ticket.ticketID) {
-        cartTicket.quantity = quantity + 1;
-      }
+    // get the difference between the current quantity and the new quantity
+    const difference = parseInt(event.target.value) - ticket.quantity;
 
-      return cartTicket;
-    });
-
-    // Update cart
-    setCart(newCart);
-
-    saveChanges();
-  }
-
-  const removeTickets = () => {
-    if (quantity <= 0) {
-      return;
-    }
-
-    setTicketsAdded(ticketsAdded - 1);
-    setQuantity(quantity - 1);
-    setRemainingTickets(remainingTickets + 1);
-
-    // Update cart
-    const newCart: LotteryTicket[] = cart.map((cartTicket) => {
-      if (cartTicket.ticketID === ticket.ticketID) {
-        cartTicket.quantity = quantity - 1;
-      }
-
-      return cartTicket;
-    });
-
-    // Update cart
-    setCart(newCart);
-
-    saveChanges();
-  }
-
-  const saveChanges = async () => {
     let openSnackbar;
 
-    if (ticketsAdded === 0) {
-      openSnackbar = handleSnackbarOpen("No changes made", "info");
-      openSnackbar();
+    if (difference === 0) {
       return;
     }
 
     try {
 
-      if (ticketsAdded > 0) {
+      if (difference > 0) {
         console.log("Adding tickets to cart");
 
-        await addToCart(ticket, ticketsAdded);
+        await addToCart(ticket, difference);
 
 
       } else {
-        const ticketsRemoved = Math.abs(ticketsAdded);
+        const ticketsRemoved = Math.abs(difference);
         await removeFromCart(ticket, ticketsRemoved);
         console.log("Removing tickets from cart");
       }
 
     } catch (error: Error | any) {
+
+      setDropdownDisabled(false);
+
       console.error(error.message);
 
       const errorMessage: SnackbarMessage = checkErrorMessage(error.message);
@@ -124,25 +82,16 @@ export default function CartItem({
       return;
     }
 
-    console.log("Changes saved");
+    setDropdownDisabled(false);
+
+    setQuantity(parseFloat(event.target.value));
+
     openSnackbar = handleSnackbarOpen("Changes saved", "success");
     openSnackbar();
     return;
-  }
 
-  const cancelChanges = () => {
 
-    if (ticketsAdded === 0) {
-      let openSnackbar = handleSnackbarOpen("No changes made", "info");
-      openSnackbar();
-      return;
-    }
-
-    console.log("Cancelling changes");
-    setTicketsAdded(0);
-    setQuantity(ticket.quantity - ticketsAdded);
-    setRemainingTickets(remainingTickets + ticketsAdded);
-  }
+  };
 
   return (
     <>
@@ -175,35 +124,20 @@ export default function CartItem({
         </section>
 
         <section className='flex w-2/12 items-center justify-center'>
-          <IconButton
-            onClick={() => {
-              removeTickets();
-            }}
-            sx={{
-              marginRight: '10px',
-              padding: '1px',
-              border: '1px solid #1e293b',
-              borderRadius: '5px'
-            }}
-          >
-            <RemoveIcon />
-          </IconButton>
-          <Typography variant="h6" className=''>
-            {quantity}
-          </Typography>
-          <IconButton
-            onClick={() => {
-              addTickets();
-            }}
-            sx={{
-              marginLeft: '10px',
-              padding: '1px',
-              border: '1px solid #1e293b',
-              borderRadius: '5px'
-            }}
-          >
-            <AddIcon />
-          </IconButton>
+          <FormControl fullWidth disabled={dropdownDisabled}>
+            <InputLabel id="cart-quantity-select-label">Quantity</InputLabel>
+            <Select
+              labelId="cart-quantity-select-label"
+              id="cart-quantity-select"
+              value={quantity.toString()}
+              label="Quantity"
+              onChange={handleChange}
+            >
+              {Array.from({ length: (remainingTickets + ticket.quantity) }, (_, i) => (
+                <MenuItem key={i} value={i + 1}>{i + 1}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </section>
 
         <section className='flex w-2/12 items-center justify-center'>
@@ -211,24 +145,6 @@ export default function CartItem({
             ${ticket.cost * quantity}
           </Typography>
         </section>
-
-        {/* <section>
-          <Button
-            onClick={() => {
-              saveChanges();
-            }}
-          >
-            Save Changes
-          </Button>
-          <Button
-            onClick={() => {
-              cancelChanges();
-            }}
-          >
-            Cancel Changes
-          </Button>
-        </section> */}
-
       </div>
     </>
   )

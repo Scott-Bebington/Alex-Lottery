@@ -15,9 +15,11 @@ import { signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword, Googl
 import { LoginProps, SnackbarMessage } from '../interfaces/interfaces';
 import firebase from 'firebase/compat/app';
 import { Link, useNavigate } from 'react-router-dom';
+import { doc, collection, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
 
 
 const app = initializeApp(firebaseConfig);
+const firestore = getFirestore(app);
 const auth = getAuth(app);
 
 export default function Login({
@@ -101,17 +103,64 @@ export default function Login({
     try {
       const result = await signInWithPopup(auth, provider);
 
-      // try to link to an existing account with an email provider if possible
-      const email = result.user.email!;
-      const methods = await fetchSignInMethodsForEmail(auth, email);
+      // check to see if the user exists in the users collection
+      const userUID = auth.currentUser?.uid;
+      const userRef = doc(collection(firestore, "users"), userUID);
+      const userDoc = await getDoc(userRef);
 
-      if (methods.includes('password')) {
-        console.log('Email provider exists');
+      if (!userDoc.exists()) {
+        console.log("User does not exist");
+        await setDoc(doc(firestore, 'users', auth.currentUser!.uid),
+          {
+            name: result.user.displayName?.split(' ')[0],
+            surname: result.user.displayName?.split(' ')[1],
+            emailLink: true,
+            googleLink: false,
+          },
+          { merge: true }
+        );
         return;
       }
 
-      console.log('Email provider does not exist');
+      // check to see if the name field exists
+      if (!userDoc.data().name) {
+        console.log('Name field does not exist');
+        await updateDoc(userRef, {
+          name: result.user.displayName?.split(' ')[0],
+        });
+      }
 
+      // check to see if the surname field exists
+      if (!userDoc.data().surname) {
+        console.log('Surname field does not exist');
+        await updateDoc(userRef, {
+          surname: result.user.displayName?.split(' ')[1],
+        });
+      }
+
+      // check to see if the phone field exists
+      if (!userDoc.data().phone) {
+        console.log('Phone field does not exist');
+        await updateDoc(userRef, {
+          phone: result.user.phoneNumber,
+        });
+      }
+
+      // check to see if the email and password link exists
+      if (userDoc.data().emailLink === null && userDoc.data().googleLink === null) {
+        console.log('Email Link does not exist');
+        await updateDoc(userRef, {
+          googleLink: true,
+          emailLink: false,
+        });
+      }
+
+      if (!userDoc.data().googleLink) {
+        console.log('Google Link does not exist');
+        await updateDoc(userRef, {
+          googleLink: true,
+        });
+      }
 
       let openSnackbar = handleSnackbarOpen('You have been signed in with Google', 'success');
       openSnackbar();

@@ -10,11 +10,12 @@ import { ProfileProps, SnackbarMessage } from '../interfaces/interfaces';
 import cart from './cart';
 import { initializeApp } from 'firebase/app';
 import firebaseConfig from '../firebaseConfig';
-import { getAuth } from 'firebase/auth';
+import { AuthError, fetchSignInMethodsForEmail, getAuth, GoogleAuthProvider, linkWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import UserData from '../classes/userData';
 import { doc, collection, getDoc, getFirestore, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { linkEmailToGoogleProvider, linkGoogleToEmailProvider } from '../functions/profile_functions';
 
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
@@ -26,7 +27,7 @@ export default function Profile({
   setUserData,
 }: ProfileProps) {
 
-  const [tabIndex, setTabIndex] = useState<number>(0);
+  const [tabIndex, setTabIndex] = useState<string>("PersonalDetails");
   const [isEdittingPersonalDetails, setIsEdittingPersonalDetails] = useState<boolean>(false);
   const [name, setName] = useState<string>(userData?.name ?? '');
   const [surname, setSurname] = useState<string>(userData?.surname ?? '');
@@ -34,19 +35,23 @@ export default function Profile({
   const [profilePicture, setProfilePicture] = useState<string>(userData?.profilePicture ?? '');
   const [file, setFile] = useState<File | null>(null);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setTabIndex(newValue);
   };
 
   const navigate = useNavigate();
 
+
+
   useEffect(() => {
-    if (auth.currentUser === null) {
+    if (auth.currentUser === null || userData === null) {
       navigate("/login");
     }
 
-    if (userData === null) {
-      navigate("/login");
+    // fetch the users auth providers
+    const user = auth.currentUser;
+    if (user === null) {
+      return;
     }
 
   }, [auth.currentUser]);
@@ -89,8 +94,6 @@ export default function Profile({
     }
   }
 
-  
-
   const formatDate = (date: any): string => {
     let parsedDate;
 
@@ -112,6 +115,14 @@ export default function Profile({
 
     return `${day}-${month}-${year}`;
   };
+
+
+
+
+
+
+
+
 
 
 
@@ -140,12 +151,13 @@ export default function Profile({
               },
             }}
           >
-            <Tab label="Personal Details" />
-            <Tab label="Pending Collection" />
-            <Tab label="Completed Orders" />
+            <Tab label="Personal Details" value="PersonalDetails" />
+            <Tab label="Account Details" value="AccountDetails" />
+            <Tab label="Pending Collection" value="PendingCollection" />
+            <Tab label="Completed Orders" value="CompletedOrders" />
           </Tabs>
 
-          {tabIndex === 0 && (
+          {tabIndex === "PersonalDetails" && (
 
             <div>
               {isEdittingPersonalDetails && (
@@ -253,7 +265,43 @@ export default function Profile({
             </div>
           )}
 
-          {tabIndex === 1 && (
+          {tabIndex === "AccountDetails" && (
+            <div>
+              <Typography variant="h6" className="text-center flex items-center px-small font-bold h-12">Account Details</Typography>
+              <div className="flex flex-col">
+                <div className="flex">
+                  <Typography variant="body1" className="font-bold pr-small">Email:</Typography>
+                  <Typography variant="body1">{userData?.email}</Typography>
+                </div>
+                <div className="flex">
+                  <Typography variant="body1" className="font-bold pr-small">Password:</Typography>
+                  <Typography variant="body1">********</Typography>
+                </div>
+              </div>
+              {userData?.googleLink === false && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="mt-small"
+                  onClick={() => linkGoogleToEmailProvider()}
+                >
+                  Link email with google account
+                </Button>
+              )}
+              {userData?.emailLink === false && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="mt-small"
+                  onClick={() => linkEmailToGoogleProvider()}
+                >
+                  Link google account with email and password
+                </Button>
+              )}
+            </div>
+          )}
+
+          {tabIndex === "PendingCollection" && (
             <div>
               {userData?.PendingCollection?.map((pendingCollection, index) => (
                 <div key={index}>
