@@ -6,6 +6,7 @@ import LotteryTicket from "../classes/lotteryTicket";
 import { Stripe } from "stripe";
 import { createCheckoutSession } from "./stripe";
 import UserData from "../classes/userData";
+import PendingCollection from "../classes/pendingCollection";
 
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
@@ -27,7 +28,6 @@ export async function getUserDetails(setUserDetails: (userDetails: any) => void,
   }
 
   const userUID = auth.currentUser.uid!;
-
   const userRef = doc(collection(firestore, "users"), userUID);
   const userDoc = await getDoc(userRef);
 
@@ -36,87 +36,55 @@ export async function getUserDetails(setUserDetails: (userDetails: any) => void,
     return;
   }
 
-  const userData: UserData = new UserData(
-    userDoc.data().name,
-    userDoc.data().surname,
-    userDoc.data().email,
-    userDoc.data().phone,
-    userDoc.data().profileImage,
-  );
+  // Listen to real-time updates on the PendingCollection subcollection
+  const pendingCollectionRef = collection(userRef, "PendingCollection");
 
-  setUserDetails(userData);
-  
-}
+  onSnapshot(pendingCollectionRef, (snapshot) => {
+    if (snapshot.empty) {
+      console.log("No pending purchases found.");
+      return;
+    }
 
-/**
- * Adds a selected ticket to the cart.
- * 
- * @param selectedTicket - The selected ticket to be added to the cart.
- * @param ticketsAddedToCart - The number of tickets added to the cart.
- * @param cart - The current cart containing the tickets.
- * @param setCart - A function to update the cart.
- * @param ticketType - The type of the ticket.
- * 
- * @returns void
- */
-export async function addPurchases(cart: LotteryTicket[]) {
+    const pendingCollectionData: PendingCollection[] = [];
 
-  // Check if the user is logged in
-  if (auth.currentUser === null) {
-    throw new Error("User is not logged in");
-  }
+    snapshot.forEach((doc) => {
+      const tempPendingCollectionTickets: LotteryTicket[] = [];
 
-  for (const ticket of cart) {
-    const userUID = auth.currentUser.uid;
-    const cartCollectionRef = collection(firestore, "users", userUID, "Purchases");
-    await addDoc(collection(firestore, "users", userUID, "Purchases"), {
-        ticketNum: ticket.number,
-        cost: ticket.cost,
-        type: ticket.type,
-        drawDate: ticket.date,
-        image: ticket.image,
-        quantity: ticket.quantity,
-        productRef: ticket.productRef,
-        datePurchased: new Date()
+      doc.data().items.forEach((inTicket: any) => {
+        const ticket = new LotteryTicket(
+          inTicket.ticketNum,
+          inTicket.drawDate,
+          inTicket.cost,
+          inTicket.type,
+          inTicket.quantity,
+          inTicket.ticketId,
+          inTicket.productRef,
+          inTicket.image
+        );
+        tempPendingCollectionTickets.push(ticket);
+      });
+
+      const datePurchased: Date = doc.data().dateOfPurchase;
+
+      const newPendingCollection: PendingCollection = new PendingCollection(tempPendingCollectionTickets, datePurchased);
+      pendingCollectionData.push(newPendingCollection);
     });
-  }
 
-  console.log("Purchases added successfully");
+    const userData: UserData = new UserData(
+      userDoc.data().name,
+      userDoc.data().surname,
+      userDoc.data().email,
+      userDoc.data().phone,
+      userDoc.data().profileImage,
+      pendingCollectionData
+    );
 
-}
-
-export async function removePurchanse() {
-
-  // Check if the user is logged in
-  if (auth.currentUser === null) {
-    throw new Error("User is not logged in");
-  }
-
-  
-}
-
-export async function clearCart(setCart: (cart: LotteryTicket[]) => void) {
-  
-  // Check if the user is logged in
-  if (auth.currentUser === null) {
-    throw new Error("User is not logged in");
-  }
-  
-  const userUID = auth.currentUser.uid;
-  
-  const cartCollectionRef = collection(firestore, "users", userUID, "Cart");
-  const cartDocs = await getDocs(cartCollectionRef);
-  
-  if (cartDocs.empty) {
-    console.log("Cart is empty");
-    return;
-  }
-  
-  cartDocs.forEach(async (doc) => {
-    await deleteDoc(doc.ref);
+    setUserDetails(userData);
+    setUserDetailsLoaded(true); // Mark user details as loaded once we have the data
+  }, (error) => {
+    console.error("Error listening to pending collection:", error);
+    setUserDetailsLoaded(false); // Handle error in loading
   });
-  
-  setCart([]);
 }
 
 export async function checkout() {

@@ -144,6 +144,7 @@ export async function addToCart(inTicket: LotteryTicket, ticketsAdded: number) {
       transaction.update(cartRef, { quantity: newQuantity });
     } else {
       transaction.set(cartRef, {
+        ticketId: inTicket.ticketID,
         cost: inTicket.cost,
         drawDate: inTicket.date,
         quantity: ticketsAdded,

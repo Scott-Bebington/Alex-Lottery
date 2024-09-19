@@ -1,5 +1,6 @@
 import { DocumentData, DocumentReference } from "firebase/firestore";
 import LotteryTicket from "./lotteryTicket";
+import PendingCollection from "./pendingCollection";
 
 /**
 
@@ -10,7 +11,8 @@ class UserData {
   email: string;
   phone?: string;
   profilePicture?: string;
-  purchases?: LotteryTicket[];
+  PendingCollection?: PendingCollection[];
+  completedOrders?: LotteryTicket[];
 
   constructor(
     name: string,
@@ -18,16 +20,19 @@ class UserData {
     email: string,
     phone?: string,
     profilePicture?: string,
-    purchases?: LotteryTicket[]
+    PendingCollection?: PendingCollection[],
+    completedOrders?: LotteryTicket[]
   ) {
     this.name = name;
     this.surname = surname;
     this.email = email;
     this.phone = phone;
     this.profilePicture = profilePicture;
-    this.purchases = purchases;
+    this.PendingCollection = PendingCollection;
+    this.completedOrders = completedOrders;
   }
-
 }
+
+
 
 export default UserData;

@@ -1,5 +1,6 @@
 "use client";
 
+import { Timestamp } from 'firebase/firestore'; // Import Firestore's Timestamp from the Firebase client SDK
 import { Typography, CardActionArea, Skeleton, CardContent, Button, Tab, Tabs, tabsClasses, TextField, Avatar } from '@mui/material';
 import React, { use, useEffect, useRef, useState } from 'react';
 import LotteryTicket from '../classes/lotteryTicket';
@@ -86,9 +87,37 @@ export default function Profile({
       console.error(error);
 
     }
-
-
   }
+
+  
+
+  const formatDate = (date: any): string => {
+    let parsedDate;
+
+    // Check if the date is a Firestore Timestamp (from Firebase client SDK)
+    if (date instanceof Timestamp) {
+      parsedDate = date.toDate(); // Convert Firestore Timestamp to JavaScript Date
+    } else {
+      parsedDate = new Date(date); // Otherwise, try converting it to a Date
+    }
+
+    // Check if the date is valid
+    if (isNaN(parsedDate.getTime())) {
+      return 'Invalid Date'; // Handle invalid date case
+    }
+
+    const day = String(parsedDate.getDate()).padStart(2, '0'); // Get day and pad to 2 digits
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0'); // Get month (0-indexed, so +1) and pad to 2 digits
+    const year = parsedDate.getFullYear(); // Get full year
+
+    return `${day}-${month}-${year}`;
+  };
+
+
+
+
+
+
   return (
     <main className="flex flex-col" style={{ minHeight: "calc(100vh - 6rem)" }}>
       <Typography variant="h5" className="text-center flex items-center px-small font-bold h-12">Your Profile</Typography>
@@ -112,7 +141,8 @@ export default function Profile({
             }}
           >
             <Tab label="Personal Details" />
-            <Tab label="Tickets Purchased" />
+            <Tab label="Pending Collection" />
+            <Tab label="Completed Orders" />
           </Tabs>
 
           {tabIndex === 0 && (
@@ -225,7 +255,20 @@ export default function Profile({
 
           {tabIndex === 1 && (
             <div>
-              Tickets purchased
+              {userData?.PendingCollection?.map((pendingCollection, index) => (
+                <div key={index}>
+                  <Typography variant="h6" className="text-center flex items-center px-small font-bold h-12">Date purchased: {formatDate(pendingCollection.purchaseDate)}</Typography>
+                  {pendingCollection.items.map((ticket, index) => (
+                    <div key={index}>
+                      <Typography variant="body1" className="flex items-center gap-4">Ticket Number: {ticket.number} - Draw Date: {ticket.date}</Typography>
+                    </div>
+
+
+                  ))}
+                </div>
+              ))}
+
+
             </div>
           )}
 
