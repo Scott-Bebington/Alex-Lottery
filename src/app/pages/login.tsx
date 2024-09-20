@@ -34,6 +34,8 @@ export default function Login({
   }
 }: LoginProps) {
 
+  // #region Signin
+
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -177,6 +179,8 @@ export default function Login({
       return;
     }
   };
+
+  // #endregion
   
 
   const signOut = async () => {

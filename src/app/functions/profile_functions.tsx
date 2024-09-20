@@ -1,6 +1,6 @@
 import firebaseConfig from "@/app/firebaseConfig";
 import { initializeApp } from "firebase/app";
-import { AuthError, EmailAuthProvider, getAuth, GoogleAuthProvider, linkWithCredential, linkWithPopup } from "firebase/auth";
+import { AuthError, EmailAuthProvider, getAuth, GoogleAuthProvider, linkWithCredential, linkWithPopup, sendPasswordResetEmail } from "firebase/auth";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, runTransaction, setDoc, updateDoc } from "firebase/firestore";
 import LotteryTicket from "../classes/lotteryTicket";
 import { Stripe } from "stripe";
@@ -184,7 +184,7 @@ export async function linkGoogleToEmailProvider() {
 };
 
 // Function to link email/password provider to a Google-signed-in user
-export async function linkEmailToGoogleProvider(email: string, password: string) {
+export async function linkEmailToGoogleProvider(email: string) {
   try {
 
     if (auth.currentUser === null) {
@@ -203,20 +203,7 @@ export async function linkEmailToGoogleProvider(email: string, password: string)
 
     const user = auth.currentUser;
 
-    console.log('User signed in with Google:', user);
-
-    // Create an EmailAuthProvider credential using the provided email and password
-    const emailCredential = EmailAuthProvider.credential(email, password);
-
-    // Link the email/password credential to the Google-signed-in user
-    const linkedCredential = await linkWithCredential(user, emailCredential);
-
-    console.log('Email/password account successfully linked to Google provider.');
-    console.log(linkedCredential);
-
-    // You can now access the linked email credentials if needed
-    const linkedUser = linkedCredential.user;
-    console.log('Linked User:', linkedUser);
+    sendPasswordResetEmail(auth, email);
 
     await updateDoc(userRef, {
       googleLink: true,
@@ -233,4 +220,13 @@ export async function linkEmailToGoogleProvider(email: string, password: string)
     }
   }
 };
+
+export async function resetPassword(email: string) {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    console.log("Password reset email sent successfully.");
+  } catch (error: AuthError | any) {
+    console.error("Error sending password reset email:", error);
+  }
+}
 

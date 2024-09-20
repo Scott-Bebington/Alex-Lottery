@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import UserData from '../classes/userData';
 import { doc, collection, getDoc, getFirestore, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
-import { linkEmailToGoogleProvider, linkGoogleToEmailProvider } from '../functions/profile_functions';
+import { linkEmailToGoogleProvider, linkGoogleToEmailProvider, resetPassword } from '../functions/profile_functions';
 
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
@@ -34,6 +34,7 @@ export default function Profile({
   const [phone, setPhone] = useState<string>(userData?.phone ?? '');
   const [profilePicture, setProfilePicture] = useState<string>(userData?.profilePicture ?? '');
   const [file, setFile] = useState<File | null>(null);
+  const [email, setEmail] = useState<string>('');
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setTabIndex(newValue);
@@ -268,16 +269,6 @@ export default function Profile({
           {tabIndex === "AccountDetails" && (
             <div>
               <Typography variant="h6" className="text-center flex items-center px-small font-bold h-12">Account Details</Typography>
-              <div className="flex flex-col">
-                <div className="flex">
-                  <Typography variant="body1" className="font-bold pr-small">Email:</Typography>
-                  <Typography variant="body1">{userData?.email}</Typography>
-                </div>
-                <div className="flex">
-                  <Typography variant="body1" className="font-bold pr-small">Password:</Typography>
-                  <Typography variant="body1">********</Typography>
-                </div>
-              </div>
               {userData?.googleLink === false && (
                 <Button
                   variant="contained"
@@ -289,15 +280,35 @@ export default function Profile({
                 </Button>
               )}
               {userData?.emailLink === false && (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  className="mt-small"
-                  onClick={() => linkEmailToGoogleProvider()}
-                >
-                  Link google account with email and password
-                </Button>
+                <>
+                  <TextField
+                    id="email-input"
+                    label="Email"
+                    variant="outlined"
+                    className='w-96'
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    className="mt-small"
+                    onClick={() => linkEmailToGoogleProvider(email)}
+                  >
+                    Link google account with email and password
+                  </Button>
+                </>
+
               )}
+
+              <Button
+                variant="contained"
+                color="primary"
+                className="mt-small"
+                onClick={() => resetPassword(email)}
+              >
+                Reset Passsword
+              </Button>
             </div>
           )}
 
