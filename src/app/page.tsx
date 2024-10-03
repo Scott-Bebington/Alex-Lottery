@@ -24,6 +24,7 @@ import Profile from './pages/profile';
 import Footer from './components/footer';
 import { getUserDetails } from './functions/profile_functions';
 import UserData from './classes/userData';
+import { getAllKidsTickets } from './functions/kids_functions';
 // import { fetchAndActivate, getRemoteConfig, getString, getValue } from 'firebase/remote-config';
 
 const app = initializeApp(firebaseConfig);
@@ -81,6 +82,7 @@ export default function Home() {
       try {
         const getAllData = async () => {
           await getAllXmasTickets(setXmasTickets, setXmasTicketsLoaded, setXmasFilteredTickets);
+          await getAllKidsTickets(setKidsTickets, setKidsTicketsLoaded, setKidsFilteredTickets);
         }
 
         getAllData();
@@ -215,10 +217,14 @@ export default function Home() {
             path="/kids"
             element={
               <Kids
-                tickets={kidsTickets}
-                setTickets={setKidsTickets}
+                kidsTickets={kidsTickets}
+                filteredTickets={kidsFilteredTickets}
+                setFilteredTickets={setKidsFilteredTickets}
+                ticketsLoaded={kidsTicketsLoaded}
                 cart={cart}
                 setCart={setCart}
+                snackbarState={snackbarState}
+                navbarProps={navbarProps}
               />
             }
           />
@@ -260,10 +266,10 @@ export default function Home() {
               </div>
             }
           />
-          <Route 
-            path="/profile" 
+          <Route
+            path="/profile"
             element={
-              <Profile 
+              <Profile
                 userData={userData}
                 setUserData={setUserData}
               />
@@ -271,16 +277,17 @@ export default function Home() {
           />
         </Routes>
         <Footer />
+        <CustomSnackbar
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          handleSnackbarClose={handleSnackbarClose}
+          handleSnackbarExited={handleSnackbarExited}
+          message={messageInfo ? messageInfo.message : ""}
+          snackbarKey={messageInfo ? messageInfo.key : 0}
+          status={messageInfo ? messageInfo.status : "success"}
+        />
       </Router>
-      <CustomSnackbar
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        handleSnackbarClose={handleSnackbarClose}
-        handleSnackbarExited={handleSnackbarExited}
-        message={messageInfo ? messageInfo.message : ""}
-        snackbarKey={messageInfo ? messageInfo.key : 0}
-        status={messageInfo ? messageInfo.status : "success"}
-      />
+
     </>
 
   );

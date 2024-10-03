@@ -49,7 +49,7 @@ export default function Ticket(
                 className="cursor-pointer border-solid border-2 border-slate-800 rounded px-small py-[2px]"
                 onClick={() => handleExpandClick(ticket.number)}
               >
-                {expandedState[ticket.number] ? "Close" : "Expand"}
+                {expandedState[ticket.number] ? "Close" : "Select"}
               </div>
             )}
           </CardActions>

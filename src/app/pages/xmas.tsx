@@ -246,7 +246,7 @@ export default function XmasDraw(
   return (
     <main className="flex flex-col" style={{ minHeight: "calc(100vh - 6rem)" }}>
       {/* <Navbar /> */}
-      <Typography variant="h3" className="text-center h-12">Christmas Draw</Typography>
+      <Typography variant="h3" className="text-center py-large">Christmas Draw</Typography>
       <section className="h-24 gap-4 px-small w-full flex justify-center">
         <TicketFilter
           id='ticket_number_input'

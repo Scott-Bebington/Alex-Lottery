@@ -1,7 +1,7 @@
 "use client";
 import AdbIcon from '@mui/icons-material/Adb';
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Avatar, Box, Button, Container, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Tooltip, Typography } from "@mui/material";
+import { AppBar, Avatar, Badge, Box, Button, Container, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Tooltip, Typography } from "@mui/material";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 // import { pages } from "next/dist/build/templates/app-page";
@@ -127,7 +127,11 @@ export default function Navbar({
               <Link to="/kids" onClick={() => pushLocation("/kids")}>Kids Draw</Link>
             </li>
             <li>
-              <Link to="/cart" onClick={() => pushLocation("/cart")}>Cart</Link>
+              <Badge badgeContent={4} color="error">
+                <Link to="/cart" onClick={() => pushLocation("/cart")}>Cart</Link>
+                <ShoppingCartOutlinedIcon sx={{ width: '15px' }} />
+              </Badge>
+
             </li>
             <li>
               <Link to="/success" onClick={() => pushLocation("/success")}>Success</Link>

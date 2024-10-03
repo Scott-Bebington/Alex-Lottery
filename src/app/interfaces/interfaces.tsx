@@ -78,10 +78,14 @@ export interface XmasDrawProps {
  * @exports KidsDrawProps
  */
 export interface KidsDrawProps {
-    tickets: LotteryTicket[];
-    setTickets: (cart: LotteryTicket[]) => void;
+    kidsTickets: LotteryTicket[];
+    filteredTickets: LotteryTicket[];
+    setFilteredTickets: (tickets: LotteryTicket[]) => void;
+    ticketsLoaded: boolean;
     cart: LotteryTicket[];
     setCart: (cart: LotteryTicket[]) => void;
+    snackbarState: SnackBarStateHandler;
+    navbarProps: NavbarProps;
 }
 // #endregion
 

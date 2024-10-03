@@ -10,6 +10,8 @@ import { addToCart, getTicket, removeFromCart } from '../functions/cart_function
 import { checkErrorMessage } from '../functions/errorChecking';
 import { CartItemProps, SnackbarMessage } from '../interfaces/interfaces';
 
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+
 export default function CartItem({
   ticket,
   cart,
@@ -93,10 +95,31 @@ export default function CartItem({
 
   };
 
+  const removeTicket = async () => {
+    try {
+      await removeFromCart(ticket, ticket.quantity);
+
+      let openSnackbar = handleSnackbarOpen("Ticket removed from cart", "success");
+      openSnackbar();
+    } catch (error: Error | any) {
+      console.error(error.message);
+    }
+  }
+
   return (
     <>
       <div className='flex h-36 border-b border-grey pb-small'>
         <section className='flex w-6/12'>
+          <div className='flex items-center h-full'>
+            <IconButton
+              className='h-fit'
+              onClick={async () => {
+                await removeTicket();
+              }}
+            >
+              <DeleteOutlineOutlinedIcon />
+            </IconButton>
+          </div>
           <img
             src={ticket.image}
             alt="Lottery ticket image"
@@ -124,17 +147,18 @@ export default function CartItem({
         </section>
 
         <section className='flex w-2/12 items-center justify-center'>
-          <FormControl fullWidth disabled={dropdownDisabled}>
-            <InputLabel id="cart-quantity-select-label">Quantity</InputLabel>
+          <FormControl fullWidth disabled={dropdownDisabled} sx={{ width: '100px' }}>
+            {/* <InputLabel id="cart-quantity-select-label">Quantity</InputLabel> */}
             <Select
-              labelId="cart-quantity-select-label"
+              // labelId="cart-quantity-select-label"
               id="cart-quantity-select"
               value={quantity.toString()}
-              label="Quantity"
+              // label="Quantity"
               onChange={handleChange}
+              sx={{ fontSize: '1.25rem' }} // Adjust the font size here
             >
               {Array.from({ length: (remainingTickets + ticket.quantity) }, (_, i) => (
-                <MenuItem key={i} value={i + 1}>{i + 1}</MenuItem>
+              <MenuItem key={i} value={i + 1}>{i + 1}</MenuItem>
               ))}
             </Select>
           </FormControl>

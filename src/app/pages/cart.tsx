@@ -84,7 +84,7 @@ export default function Cart({
         >
           <div className="px-small flex">
             <Typography variant="h6" className="text-left w-6/12">Ticket</Typography>
-            <Typography variant="h6" className="text-center w-2/12">Price</Typography>
+            <Typography variant="h6" className="text-center w-2/12">Ticket Price</Typography>
             <Typography variant="h6" className="text-center w-2/12">Quantity</Typography>
             <Typography variant="h6" className="text-center w-2/12">Total Price</Typography>
           </div>
