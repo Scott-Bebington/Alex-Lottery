@@ -247,12 +247,20 @@ export default function XmasDraw(
   const [sliderMin, setSliderMin] = useState<number>(0);
   const [sliderMax, setSliderMax] = useState<number>(25);
 
-
   const handleChange = (_: Event, newValue: number | number[]) => {
     if (Array.isArray(newValue)) {
       setSliderMin(newValue[0] as number);
       setSliderMax(newValue[1] as number);
+
+      // filter tickets by cost
+      const filtered = xmasTickets.filter(ticket =>
+        ticket.cost >= newValue[0] && ticket.cost <= newValue[1]
+      );
+
+      setFilteredTickets(filtered);
     }
+
+
   };
 
   function valuetext(value: number) {
@@ -283,7 +291,7 @@ export default function XmasDraw(
           getOptionLabel={filterByDate}
         />
         <div className="w-1/3 h-14 mt-3 border-2 border-gray-400 rounded-[4px] relative p-4">
-            <Typography
+          <Typography
             id="track-inverted-slider"
             sx={{
               position: 'absolute',
@@ -293,9 +301,9 @@ export default function XmasDraw(
               padding: '0 4px',
               fontSize: '0.875rem' // Optional: adjust size if needed
             }}
-            >
+          >
             Cost
-            </Typography>
+          </Typography>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Typography>
               {sliderMin}€
