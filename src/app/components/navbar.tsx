@@ -23,7 +23,8 @@ export default function Navbar({
   user,
   setUser,
   history,
-  setHistory
+  setHistory,
+  cart
 }: NavbarProps) {
 
   const [open, setOpen] = React.useState(false);
@@ -127,14 +128,14 @@ export default function Navbar({
               <Link to="/kids" onClick={() => pushLocation("/kids")}>Kids Draw</Link>
             </li>
             <li>
-              <Badge badgeContent={4} color="error">
+              <Badge badgeContent={cart.length} color="error" className='pr-2'>
                 <Link to="/cart" onClick={() => pushLocation("/cart")}>Cart</Link>
                 <ShoppingCartOutlinedIcon sx={{ width: '15px' }} />
               </Badge>
 
             </li>
             <li>
-              <Link to="/success" onClick={() => pushLocation("/success")}>Success</Link>
+              {/* <Link to="/success" onClick={() => pushLocation("/success")}>Success</Link> */}
             </li>
           </ul>
           <ul className="flex space-x-4">

@@ -185,7 +185,8 @@ export default function Home() {
     user,
     setUser,
     history,
-    setHistory
+    setHistory,
+    cart
   };
 
   return (
@@ -196,6 +197,7 @@ export default function Home() {
           setUser={setUser}
           history={history}
           setHistory={setHistory}
+          cart={cart}
         />
         <Routes>
           <Route

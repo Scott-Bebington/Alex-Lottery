@@ -182,6 +182,7 @@ export interface NavbarProps {
     setUser: (user: any) => void;
     history: string[];
     setHistory: (history: string[]) => void;
+    cart: LotteryTicket[];
 }
 // #endregion
 

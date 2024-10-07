@@ -1,5 +1,5 @@
 "use client";
-import { CardActionArea, CardContent, Skeleton, Typography } from "@mui/material";
+import { Box, CardActionArea, CardContent, Skeleton, Slider, Typography } from "@mui/material";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 
 import LotteryTicket from '../classes/lotteryTicket';
@@ -243,6 +243,24 @@ export default function XmasDraw(
   }, [costInputValue]);
   // #endregion
 
+  // #region Slider
+  const [sliderMin, setSliderMin] = useState<number>(0);
+  const [sliderMax, setSliderMax] = useState<number>(25);
+
+
+  const handleChange = (_: Event, newValue: number | number[]) => {
+    if (Array.isArray(newValue)) {
+      setSliderMin(newValue[0] as number);
+      setSliderMax(newValue[1] as number);
+    }
+  };
+
+  function valuetext(value: number) {
+    return `${value} €`;
+  }
+  // #endregion
+
+
   return (
     <main className="flex flex-col" style={{ minHeight: "calc(100vh - 6rem)" }}>
       {/* <Navbar /> */}
@@ -264,14 +282,42 @@ export default function XmasDraw(
           inputValue={drawDateInputValue}
           getOptionLabel={filterByDate}
         />
-        <TicketFilter
-          id='cost_input'
-          label='Cost'
-          tickets={xmasTickets}
-          setInputValue={setCostInputValue}
-          inputValue={costInputValue}
-          getOptionLabel={filterByCost}
-        />
+        <div className="w-1/3 h-14 mt-3 border-2 border-gray-400 rounded-[4px] relative p-4">
+            <Typography
+            id="track-inverted-slider"
+            sx={{
+              position: 'absolute',
+              top: '-10px',
+              left: '10px',
+              backgroundColor: 'rgb(233, 231, 231)',
+              padding: '0 4px',
+              fontSize: '0.875rem' // Optional: adjust size if needed
+            }}
+            >
+            Cost
+            </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Typography>
+              {sliderMin}€
+            </Typography>
+            <Slider
+              track="inverted"
+              aria-labelledby="track-inverted-slider"
+              valueLabelDisplay="auto"
+              getAriaValueText={valuetext}
+              defaultValue={[0, 25]}
+              step={1}
+              onChange={handleChange}
+              max={25}
+              sx={{ margin: "0 14px" }} // Adds space between labels and slider
+            />
+            <Typography>
+              {sliderMax}€
+            </Typography>
+          </Box>
+        </div>
+
+
       </section>
 
       <section className="flex flex-1 w-full">
