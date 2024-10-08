@@ -35,7 +35,7 @@ export default function Cart({
 }: CartProps) {
   const navigate = useNavigate();
   useEffect(() => {
-    console.log("Cart page loaded");
+    // console.log("Cart page loaded");
     if (!auth.currentUser) {
       let infoMesssage: SnackbarMessage = {
         message: "You must be logged in to view your cart",

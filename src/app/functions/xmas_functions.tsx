@@ -20,8 +20,8 @@ export async function getAllXmasTickets(setXmasTickets: (tickets: LotteryTicket[
             const ticketID = doc.id;
 
             const drawDate: Date = ticket.drawDate.toDate();
-            const formattedDate = drawDate.getDay() + "-" + drawDate.getMonth() + "-" + drawDate.getFullYear();
-
+            // console.log(drawDate);
+            const formattedDate = drawDate.getDate() + "-" + (drawDate.getMonth() +  1) + "-" + drawDate.getFullYear();
             if (ticket.quantity === 0) {
                 continue;
             }

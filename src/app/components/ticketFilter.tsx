@@ -14,7 +14,7 @@ export default function TicketFilter({
 
   return (
     <Autocomplete
-      className="flex-1 mt-small"
+      className="flex-1 mt-small w-1/3"
       id={id}
       freeSolo
       options={tickets.map(getOptionLabel)}
