@@ -128,14 +128,13 @@ export default function Navbar({
               <Link to="/kids" onClick={() => pushLocation("/kids")}>Kids Draw</Link>
             </li>
             <li>
-              <Badge badgeContent={cart.length} color="error" className='pr-2'>
-                <Link to="/cart" onClick={() => pushLocation("/cart")}>Cart</Link>
-                <ShoppingCartOutlinedIcon sx={{ width: '15px' }} />
-              </Badge>
+              <Link to="/cart" onClick={() => pushLocation("/cart")}>
+                Cart
+                <Badge badgeContent={cart.length} color="error" className='pr-2'>
+                  <ShoppingCartOutlinedIcon sx={{ width: '15px' }} />
+                </Badge>
+              </Link>
 
-            </li>
-            <li>
-              {/* <Link to="/success" onClick={() => pushLocation("/success")}>Success</Link> */}
             </li>
           </ul>
           <ul className="flex space-x-4">

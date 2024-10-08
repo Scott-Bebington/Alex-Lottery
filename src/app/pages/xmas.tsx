@@ -1,5 +1,5 @@
 "use client";
-import { Box, CardActionArea, CardContent, Skeleton, Slider, Typography } from "@mui/material";
+import { Autocomplete, Box, CardActionArea, CardContent, Checkbox, FormControl, InputLabel, ListItemText, ListSubheader, MenuItem, OutlinedInput, Select, SelectChangeEvent, Skeleton, Slider, TextField, Typography } from "@mui/material";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 
 import LotteryTicket from '../classes/lotteryTicket';
@@ -226,28 +226,80 @@ export default function XmasDraw(
       ticket.number.toString().includes(ticketNumberInputValue)
     );
     setFilteredTickets(filtered);
-  }, [ticketNumberInputValue]);
+  }, [ticketNumberInputValue]); 
+
+  const filterTickets = () => {
+
+  }
+  // #endregion
+
+  // #region Date Range Input
+
+  const [dates, setDates] = useState<string[]>([]);
+  const [categories, setCategories] = useState<{ [key: string]: string[] }>({
+    "This Week": [],
+    "Next Week": [],
+    "This Month": [],
+    "Later": []
+  });
 
   useEffect(() => {
-    const filtered = xmasTickets.filter(ticket =>
-      ticket.date.includes(drawDateInputValue)
-    );
-    setFilteredTickets(filtered);
-  }, [drawDateInputValue]);
 
-  useEffect(() => {
-    const filtered = xmasTickets.filter(ticket =>
-      ticket.cost.toString().includes(costInputValue)
-    );
-    setFilteredTickets(filtered);
-  }, [costInputValue]);
+    const today = new Date();
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    const thisMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    const localCategories: { [key: string]: string[] } = {
+      "This Week": [],
+      "Next Week": [],
+      "This Month": [],
+      "Later": []
+    };
+
+    xmasTickets.forEach(ticket => {
+
+      const ticketDate = new Date();
+      ticketDate.setDate(parseInt(ticket.date.split("-")[0]));
+      ticketDate.setMonth(parseInt(ticket.date.split("-")[1]) - 1);
+      ticketDate.setFullYear(parseInt(ticket.date.split("-")[2]));
+      if (ticketDate <= nextWeek) {
+        localCategories["This Week"].push(ticket.date);
+      } else if (ticketDate <= thisMonth) {
+        localCategories["Next Week"].push(ticket.date);
+      } else if (ticketDate.getMonth() === today.getMonth()) {
+        localCategories["This Month"].push(ticket.date);
+      } else {
+        localCategories["Later"].push(ticket.date);
+      }
+    });
+
+    setCategories(localCategories);
+  }, [xmasTickets]);
+
+  const handleDateChange = (event: SelectChangeEvent<string[]>) => {
+    const {
+      target: { value },
+    } = event;
+    setDates(typeof value === 'string' ? value.split(',') : value);
+
+    if (value.length === 0) {
+      setFilteredTickets(xmasTickets);
+    } else {
+      const filtered = xmasTickets.filter(ticket =>
+        value.includes(ticket.date)
+      );
+      setFilteredTickets(filtered);
+    }
+  };
+
   // #endregion
 
   // #region Slider
   const [sliderMin, setSliderMin] = useState<number>(0);
   const [sliderMax, setSliderMax] = useState<number>(25);
 
-  const handleChange = (_: Event, newValue: number | number[]) => {
+  const handleSliderChange = (_: Event, newValue: number | number[]) => {
     if (Array.isArray(newValue)) {
       setSliderMin(newValue[0] as number);
       setSliderMax(newValue[1] as number);
@@ -259,8 +311,6 @@ export default function XmasDraw(
 
       setFilteredTickets(filtered);
     }
-
-
   };
 
   function valuetext(value: number) {
@@ -274,22 +324,88 @@ export default function XmasDraw(
       {/* <Navbar /> */}
       <Typography variant="h3" className="text-center py-large">Christmas Draw</Typography>
       <section className="h-24 gap-4 px-small w-full flex justify-center">
-        <TicketFilter
+        {/* <TicketFilter
           id='ticket_number_input'
           label='Lottery Ticket Number'
           tickets={xmasTickets}
           setInputValue={setTicketNumberInput}
           inputValue={ticketNumberInputValue}
           getOptionLabel={filterByNumber}
+        /> */}
+        <Autocomplete
+          className="flex-1 mt-small w-1/3"
+          id='ticket_number_input'
+          freeSolo
+          options={xmasTickets.map(filterByNumber)}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label='Lottery Ticket Number'
+              value={ticketNumberInputValue}
+              onChange={(e) => setTicketNumberInput(e.target.value)}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: '#1e293b',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1e293b',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: 'inherit', // Use inherit to keep the default label color
+                  '&.Mui-focused': {
+                    color: 'inherit', // Change label color to red when focused
+                  },
+                },
+              }}
+            />
+          )}
+          onInputChange={(event, newInputValue) => {
+            setTicketNumberInput(newInputValue);
+          }}
         />
-        <TicketFilter
-          id='draw_date_input'
-          label='Draw Date'
-          tickets={xmasTickets}
-          setInputValue={setDrawDateInputValue}
-          inputValue={drawDateInputValue}
-          getOptionLabel={filterByDate}
-        />
+        <FormControl sx={{ width: "33%", marginTop: "12px" }}>
+          <InputLabel htmlFor="grouped-select">Draw Date</InputLabel>
+          <Select
+            labelId="demo-multiple-checkbox-label"
+            id="demo-multiple-checkbox"
+            multiple
+            value={dates}
+            onChange={handleDateChange}
+            input={<OutlinedInput label="Draw Date" />}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            <ListSubheader>This Week</ListSubheader>
+            {categories["This Week"].map((date) => (
+              <MenuItem key={date} value={date}>
+                <Checkbox checked={dates.indexOf(date) > -1} />
+                <ListItemText primary={date} />
+              </MenuItem>
+            ))}
+            <ListSubheader>Next Week</ListSubheader>
+            {categories["Next Week"].map((date) => (
+              <MenuItem key={date} value={date}>
+                <Checkbox checked={dates.indexOf(date) > -1} />
+                <ListItemText primary={date} />
+              </MenuItem>
+            ))}
+            <ListSubheader>This Month</ListSubheader>
+            {categories["This Month"].map((date) => (
+              <MenuItem key={date} value={date}>
+                <Checkbox checked={dates.indexOf(date) > -1} />
+                <ListItemText primary={date} />
+              </MenuItem>
+            ))}
+            <ListSubheader>Later</ListSubheader>
+            {categories["Later"].map((date) => (
+              <MenuItem key={date} value={date}>
+                <Checkbox checked={dates.indexOf(date) > -1} />
+                <ListItemText primary={date} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <div className="w-1/3 h-14 mt-3 border-2 border-gray-400 rounded-[4px] relative p-4">
           <Typography
             id="track-inverted-slider"
@@ -315,7 +431,7 @@ export default function XmasDraw(
               getAriaValueText={valuetext}
               defaultValue={[0, 25]}
               step={1}
-              onChange={handleChange}
+              onChange={handleSliderChange}
               max={25}
               sx={{ margin: "0 14px" }} // Adds space between labels and slider
             />
