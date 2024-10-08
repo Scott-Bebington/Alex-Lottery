@@ -1,5 +1,5 @@
 "use client";
-import { Autocomplete, Box, CardActionArea, CardContent, Checkbox, FormControl, InputLabel, ListItemText, ListSubheader, MenuItem, OutlinedInput, Select, SelectChangeEvent, Skeleton, Slider, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, CardActionArea, CardContent, Checkbox, FormControl, InputLabel, ListItemText, ListSubheader, MenuItem, OutlinedInput, Select, SelectChangeEvent, Skeleton, Slider, TextField, Typography } from "@mui/material";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 
 import LotteryTicket from '../classes/lotteryTicket';
@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import firebaseConfig from "../firebaseConfig";
+import ActionButton from "../components/actionButton";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -50,16 +51,14 @@ export default function XmasDraw(
   */
   const [ticketNumberInputValue, setTicketNumberInput] = useState<string>('');
   const [drawDateInputValue, setDrawDateInputValue] = useState<string>('');
-  const [costInputValue, setCostInputValue] = useState<string>('');
-  const filterByDate = (ticket: LotteryTicket) => ticket.date.toString();
   const filterByNumber = (ticket: LotteryTicket) => ticket.number.toString();
-  const filterByCost = (ticket: LotteryTicket) => ticket.cost.toString();
   const navigate = useNavigate();
   /*
   * Selected ticket state management
   */
   const [selectedTicket, setSelectedTicket] = useState<LotteryTicket | null>(null);
   const [ticketsAddedToCart, setTicketsAddedToCart] = useState<number>(0);
+  const [dates, setDates] = useState<string[]>([]);
 
   // #region Ticket Expand
   /*
@@ -217,25 +216,72 @@ export default function XmasDraw(
   }, [executeRedirect, selectedTicket, ticketsAddedToCart]);
   // #endregion
 
+  // #region Slider
+  const [sliderMin, setSliderMin] = useState<number>(0);
+  const [sliderMax, setSliderMax] = useState<number>(25);
+
+  function valuetext(value: number) {
+    return `${value} €`;
+  }
+  // #endregion
+
   // #region Ticket filtering
-  /*
-  * Ticket filtering
-  */
   useEffect(() => {
-    const filtered = xmasTickets.filter(ticket =>
-      ticket.number.toString().includes(ticketNumberInputValue)
-    );
-    setFilteredTickets(filtered);
-  }, [ticketNumberInputValue]); 
+    filterTickets();
+  }, [sliderMin, sliderMax, dates, ticketNumberInputValue]);
+
+
+  const handleDateChange = (event: SelectChangeEvent<string[]>) => {
+    const {
+      target: { value },
+    } = event;
+    setDates(typeof value === 'string' ? value.split(',') : value); // This will asynchronously update dates
+
+    // No need to call filterTickets here directly
+  };
+
+  const handleSliderChange = (_: Event, newValue: number | number[]) => {
+    if (Array.isArray(newValue)) {
+      setSliderMin(newValue[0] as number);
+      setSliderMax(newValue[1] as number);
+    }
+  };
 
   const filterTickets = () => {
 
+    var tempTickets: LotteryTicket[] = xmasTickets;
+
+    if (ticketNumberInputValue !== "") {
+      tempTickets = tempTickets.filter(ticket =>
+        ticket.number.toString().includes(ticketNumberInputValue)
+      );
+    }
+
+    if (dates.length > 0) {
+      tempTickets = tempTickets.filter(ticket =>
+        dates.includes(ticket.date)
+      );
+    }
+
+    if (sliderMin >= 0 || sliderMax <= 25) {
+      tempTickets = tempTickets.filter(ticket =>
+        ticket.cost >= sliderMin && ticket.cost <= sliderMax
+      );
+    }
+
+    setFilteredTickets(tempTickets);
+  }
+
+  const clearFilters = () => {
+    setTicketNumberInput("");
+    setDrawDateInputValue("");
+    setSliderMin(0);
+    setSliderMax(25);
+    setDates([]);
   }
   // #endregion
 
   // #region Date Range Input
-
-  const [dates, setDates] = useState<string[]>([]);
   const [categories, setCategories] = useState<{ [key: string]: string[] }>({
     "This Week": [],
     "Next Week": [],
@@ -276,64 +322,15 @@ export default function XmasDraw(
 
     setCategories(localCategories);
   }, [xmasTickets]);
-
-  const handleDateChange = (event: SelectChangeEvent<string[]>) => {
-    const {
-      target: { value },
-    } = event;
-    setDates(typeof value === 'string' ? value.split(',') : value);
-
-    if (value.length === 0) {
-      setFilteredTickets(xmasTickets);
-    } else {
-      const filtered = xmasTickets.filter(ticket =>
-        value.includes(ticket.date)
-      );
-      setFilteredTickets(filtered);
-    }
-  };
-
   // #endregion
-
-  // #region Slider
-  const [sliderMin, setSliderMin] = useState<number>(0);
-  const [sliderMax, setSliderMax] = useState<number>(25);
-
-  const handleSliderChange = (_: Event, newValue: number | number[]) => {
-    if (Array.isArray(newValue)) {
-      setSliderMin(newValue[0] as number);
-      setSliderMax(newValue[1] as number);
-
-      // filter tickets by cost
-      const filtered = xmasTickets.filter(ticket =>
-        ticket.cost >= newValue[0] && ticket.cost <= newValue[1]
-      );
-
-      setFilteredTickets(filtered);
-    }
-  };
-
-  function valuetext(value: number) {
-    return `${value} €`;
-  }
-  // #endregion
-
 
   return (
     <main className="flex flex-col" style={{ minHeight: "calc(100vh - 6rem)" }}>
       {/* <Navbar /> */}
       <Typography variant="h3" className="text-center py-large">Christmas Draw</Typography>
       <section className="h-24 gap-4 px-small w-full flex justify-center">
-        {/* <TicketFilter
-          id='ticket_number_input'
-          label='Lottery Ticket Number'
-          tickets={xmasTickets}
-          setInputValue={setTicketNumberInput}
-          inputValue={ticketNumberInputValue}
-          getOptionLabel={filterByNumber}
-        /> */}
         <Autocomplete
-          className="flex-1 mt-small w-1/3"
+          className="mt-small w-1/4"
           id='ticket_number_input'
           freeSolo
           options={xmasTickets.map(filterByNumber)}
@@ -365,7 +362,7 @@ export default function XmasDraw(
             setTicketNumberInput(newInputValue);
           }}
         />
-        <FormControl sx={{ width: "33%", marginTop: "12px" }}>
+        <FormControl sx={{ width: "25%", marginTop: "12px" }}>
           <InputLabel htmlFor="grouped-select">Draw Date</InputLabel>
           <Select
             labelId="demo-multiple-checkbox-label"
@@ -406,7 +403,7 @@ export default function XmasDraw(
             ))}
           </Select>
         </FormControl>
-        <div className="w-1/3 h-14 mt-3 border-2 border-gray-400 rounded-[4px] relative p-4">
+        <div className="w-1/4 h-14 mt-3 border-2 border-gray-400 rounded-[4px] relative p-4">
           <Typography
             id="track-inverted-slider"
             sx={{
@@ -429,7 +426,7 @@ export default function XmasDraw(
               aria-labelledby="track-inverted-slider"
               valueLabelDisplay="auto"
               getAriaValueText={valuetext}
-              defaultValue={[0, 25]}
+              value={[sliderMin, sliderMax]}
               step={1}
               onChange={handleSliderChange}
               max={25}
@@ -440,6 +437,22 @@ export default function XmasDraw(
             </Typography>
           </Box>
         </div>
+
+        <div className="mt-3 w-1/4">
+          <ActionButton
+            onClick={() => clearFilters()}
+            className="w-full h-14 mt-3"
+            staticText="Clear Filters"
+            loadingText="Clearing..."
+            backgroundColour='rgb(233, 231, 231)'
+            colour='#1e293b'
+            hoverBackgroundColour='#1e293b'
+            hoverColour='white'
+            border='#1e293b'
+          />
+        </div>
+
+
 
 
       </section>
