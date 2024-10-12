@@ -86,10 +86,17 @@ export default function Navbar({
       if (user) {
         setUser(user);
         if (history.length > 0) {
+          console.log("Navigating to", history[history.length - 1]);
           navigate(history[history.length - 1]);
         } else {
-          if (document.cookie.includes("redirectToSuccess=true")) {
+          // get the url redirecct query parameter
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get("redirect");
+          if (redirect === "success") {
             navigate("/success");
+          } else if (redirect === "cancel") {
+            console.log("Going to cancel page");
+            navigate("/cart");
           } else {
             navigate("/");
           }
