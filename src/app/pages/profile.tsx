@@ -117,19 +117,6 @@ export default function Profile({
     return `${day}-${month}-${year}`;
   };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   return (
     <main className="flex flex-col" style={{ minHeight: "calc(100vh - 6rem)" }}>
       <Typography variant="h5" className="text-center flex items-center px-small font-bold h-12">Your Profile</Typography>

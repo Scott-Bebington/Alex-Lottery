@@ -98,6 +98,9 @@ export default function Home() {
 
   useEffect(() => {
     if (!auth.currentUser) {
+      setCart([]);
+      setUser(null);
+      setUserData(null);
       return;
     }
 
@@ -115,8 +118,6 @@ export default function Home() {
 
       console.error(error.message);
     }
-
-
 
   }, [auth.currentUser]);
 

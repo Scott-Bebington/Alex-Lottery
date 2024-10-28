@@ -86,7 +86,7 @@ export default function Navbar({
       if (user) {
         setUser(user);
         if (history.length > 0) {
-          console.log("Navigating to", history[history.length - 1]);
+          // console.log("Navigating to", history[history.length - 1]);
           navigate(history[history.length - 1]);
         } else {
           // get the url redirecct query parameter

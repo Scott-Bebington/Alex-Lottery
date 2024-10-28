@@ -1,10 +1,11 @@
 "use client";
 import CloseIcon from '@mui/icons-material/Close';
-import { Alert, AlertColor, IconButton } from "@mui/material";
+import { Alert, AlertColor, Button, IconButton } from "@mui/material";
 import Snackbar from '@mui/material/Snackbar';
 import { Fragment } from "react";
 
 import { SnackbarProps } from '../interfaces/interfaces';
+import React from 'react';
 
 export default function CustomSnackbar({
     snackbarOpen,
@@ -14,6 +15,20 @@ export default function CustomSnackbar({
     snackbarKey,
     status
 }: SnackbarProps) {
+
+    const action = (
+        <React.Fragment>
+          <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={handleSnackbarClose}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </React.Fragment>
+      );
+
     return (
         <>
             <Snackbar
@@ -24,16 +39,7 @@ export default function CustomSnackbar({
                 TransitionProps={{ onExited: handleSnackbarExited }}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
                 action={
-                    <Fragment>
-                        <IconButton
-                            aria-label="close"
-                            color="inherit"
-                            sx={{ p: 0.5 }}
-                            onClick={handleSnackbarClose}
-                        >
-                            <CloseIcon />
-                        </IconButton>
-                    </Fragment>
+                    action
                 }
             >
                 <Alert

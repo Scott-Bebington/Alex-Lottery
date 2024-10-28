@@ -265,7 +265,7 @@ export async function clearCart(setCart: (cart: LotteryTicket[]) => void) {
   setCart([]);
 }
 
-export async function checkout() {
+export async function checkout(isShipping: boolean) {
 
   if (auth.currentUser === null) {
     throw new Error("User is not logged in");
@@ -283,10 +283,8 @@ export async function checkout() {
     return;
   }
 
-  // create a cookie with the name 'redirectToSuccess' and the value 'true'
-  // document.cookie = "redirectToSuccess=true";
+  const session = await createCheckoutSession(isShipping);
 
-  const session = await createCheckoutSession();
 
   console.log(session.url);
   // window.open(session.url!);

@@ -1,5 +1,5 @@
 "use client";
-import { Button, CardActionArea, CardContent, Skeleton, Typography } from "@mui/material";
+import { Button, CardActionArea, CardContent, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Skeleton, TextField, Typography } from "@mui/material";
 
 
 import LotteryTicket from "../classes/lotteryTicket";
@@ -8,7 +8,7 @@ import Footer from '../components/footer';
 import Navbar from '../components/navbar';
 
 import { CartProps, SnackbarMessage } from '../interfaces/interfaces';
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { initializeApp } from "firebase/app";
 import firebaseConfig from "../firebaseConfig";
 import { getAuth } from "firebase/auth";
@@ -34,6 +34,8 @@ export default function Cart({
   }
 }: CartProps) {
   const navigate = useNavigate();
+  const [shippingMethod, setShippingMethod] = useState('');
+
   useEffect(() => {
     // console.log("Cart page loaded");
     if (!auth.currentUser) {
@@ -59,6 +61,10 @@ export default function Cart({
       total += ticket.cost * ticket.quantity;
     });
 
+    if (shippingMethod === 'shipping') {
+      total += 5;
+    }
+
     return total;
 
   }
@@ -73,6 +79,8 @@ export default function Cart({
     messageInfo,
     snackPack
   };
+
+  
 
   return (
     <main className="flex flex-col" style={{ minHeight: "calc(100vh - 6rem)" }}>
@@ -124,15 +132,72 @@ export default function Cart({
 
         </div>
         <aside
-          className="w-1/4 p-small overflow-y-auto bg-white mr-small mb-small rounded"
+          className="w-1/4 p-small overflow-y-auto bg-white mr-small mb-small rounded flex flex-col justify-between"
           style={{ maxHeight: "calc(100vh - 9rem)", alignItems: "flex-start" }}
         >
-          <Typography variant="h4" className="text-center">Total: {calculateTotal()} €</Typography>
+          <section className="space-y-5 flex flex-col items-start">
+            <Typography variant="h4" className="text-center">Total: {calculateTotal()} €</Typography>
+            <FormControl>
+              <FormLabel id="demo-radio-buttons-group-label">Shipping method</FormLabel>
+              <RadioGroup
+                aria-labelledby="demo-radio-buttons-group-label"
+                defaultValue=""
+                name="radio-buttons-group"
+                value={shippingMethod}
+                onChange={(event) => {setShippingMethod(event.target.value)}}
+              >
+                <FormControlLabel value="collect" control={<Radio />} label="Collection" />
+                <FormControlLabel value="shipping" control={<Radio />} label="Shipping" />
+              </RadioGroup>
+            </FormControl>
+
+            {shippingMethod === 'collect' && (
+              <Typography variant="body1">You can collect your tickets at our office.</Typography>
+            )}
+
+            {shippingMethod === 'shipping' && (
+              <div>
+                Shipping details will be collected on the payment page
+              </div>
+            )}
+          </section>
           <Button
+            className="w-full"
+            sx={{
+              border: '1px solid #1e293b',
+              backgroundColor: '#1e293b',
+              color: 'white',
+              ':hover': { backgroundColor: 'white', color: '#1e293b' },
+            }}
             onClick={async () => {
 
               try {
-                await checkout();
+
+                if (calculateTotal() === 0) {
+                  let infoMesssage: SnackbarMessage = {
+                    message: "Your cart is empty",
+                    key: 0,
+                    status: "info"
+                  };
+                  let openSnackbar = handleSnackbarOpen(infoMesssage.message, 'info');
+                  openSnackbar();
+                  return;
+                }
+
+                const isShipping : boolean = shippingMethod === 'shipping';
+
+                if (shippingMethod === '') {
+                  let infoMesssage: SnackbarMessage = {
+                    message: "Please select a shipping method",
+                    key: 0,
+                    status: "info"
+                  };
+                  let openSnackbar = handleSnackbarOpen(infoMesssage.message, 'info');
+                  openSnackbar();
+                  return;
+                }
+
+                await checkout(isShipping);
               } catch (error: Error | any) {
                 if (error.message === "User is not logged in") {
                   let infoMesssage: SnackbarMessage = {

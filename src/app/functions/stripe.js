@@ -10,7 +10,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 
-export const createCheckoutSession = async () => {
+export const createCheckoutSession = async (isShipping) => {
   if (!auth.currentUser) {
     throw new Error("User is not logged in");
   }
@@ -48,16 +48,70 @@ export const createCheckoutSession = async () => {
   const stripeSecretKey = getString(remoteConfig, 'STRIPE_SECRET_KEY');
   const stripe = require('stripe')(stripeSecretKey);
 
-  // const session = await stripe.checkout.sessions.create({
-  //     success_url: 'http://localhost:3000/success',
-  //     cancel_url: 'http://localhost:3000/cart',
-  //     line_items: cartItems.map(item => ({
-  //         price: item.price,
-  //         quantity: item.quantity,
-  //     })),
-  //     mode: 'payment',
-  //     client_reference_id: auth.currentUser.uid,
-  // });
+  if (isShipping) {
+    const session = await stripe.checkout.sessions.create({
+      success_url: 'http://localhost:3000/success',
+      cancel_url: 'http://localhost:3000/cancelled',
+      line_items: cartItems.map(item => ({
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      mode: 'payment',
+      client_reference_id: auth.currentUser.uid,
+
+      // Shipping details restricted to Spain
+      shipping_address_collection: {
+        allowed_countries: ['ES'], // Only allow shipping to Spain
+      },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: {
+              amount: 500, // Shipping cost in cents (e.g., €5.00)
+              currency: 'eur', // Set currency to Euro
+            },
+            display_name: 'Standard shipping',
+            delivery_estimate: {
+              minimum: {
+                unit: 'business_day',
+                value: 5,
+              },
+              maximum: {
+                unit: 'business_day',
+                value: 7,
+              },
+            },
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: {
+              amount: 1000, // Shipping cost in cents (e.g., €10.00)
+              currency: 'eur',
+            },
+            display_name: 'Express shipping',
+            delivery_estimate: {
+              minimum: {
+                unit: 'business_day',
+                value: 1,
+              },
+              maximum: {
+                unit: 'business_day',
+                value: 2,
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    return session;
+  }
+
+
+
   const session = await stripe.checkout.sessions.create({
     success_url: 'http://localhost:3000/success',
     cancel_url: 'http://localhost:3000/cancelled',
@@ -67,53 +121,6 @@ export const createCheckoutSession = async () => {
     })),
     mode: 'payment',
     client_reference_id: auth.currentUser.uid,
-
-    // Shipping details restricted to Spain
-    // shipping_address_collection: {
-    //   allowed_countries: ['ES'], // Only allow shipping to Spain
-    // },
-    // shipping_options: [
-    //   {
-    //     shipping_rate_data: {
-    //       type: 'fixed_amount',
-    //       fixed_amount: {
-    //         amount: 500, // Shipping cost in cents (e.g., €5.00)
-    //         currency: 'eur', // Set currency to Euro
-    //       },
-    //       display_name: 'Standard shipping',
-    //       delivery_estimate: {
-    //         minimum: {
-    //           unit: 'business_day',
-    //           value: 5,
-    //         },
-    //         maximum: {
-    //           unit: 'business_day',
-    //           value: 7,
-    //         },
-    //       },
-    //     },
-    //   },
-    //   {
-    //     shipping_rate_data: {
-    //       type: 'fixed_amount',
-    //       fixed_amount: {
-    //         amount: 1000, // Shipping cost in cents (e.g., €10.00)
-    //         currency: 'eur',
-    //       },
-    //       display_name: 'Express shipping',
-    //       delivery_estimate: {
-    //         minimum: {
-    //           unit: 'business_day',
-    //           value: 1,
-    //         },
-    //         maximum: {
-    //           unit: 'business_day',
-    //           value: 2,
-    //         },
-    //       },
-    //     },
-    //   },
-    // ],
   });
 
 

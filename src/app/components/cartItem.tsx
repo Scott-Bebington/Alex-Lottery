@@ -125,19 +125,20 @@ export default function CartItem({
             alt="Lottery ticket image"
             className='rounded px-small pt-small'
           />
-          <CardContent className='flex flex-col items-start justify-between'>
-            <Typography variant="subtitle2" className='text-gray-400'>
-              Draw Date: {ticket.date}
-            </Typography>
-
-            <Typography variant="h4" className=''>
-              {ticket.number}
-            </Typography>
+          <div className='flex flex-col items-start justify-between h-full pt-2'>
+            <div>
+              <Typography variant="h4" className=''>
+                {ticket.number}
+              </Typography>
+              <Typography variant="subtitle2" className='text-gray-400'>
+                Draw Date: {ticket.date}
+              </Typography>
+            </div>
 
             <Typography variant="subtitle2" className='text-gray-400'>
               Tickets left: {remainingTickets}
             </Typography>
-          </CardContent>
+          </div>
         </section>
 
         <section className='flex w-2/12 items-center justify-center'>
@@ -158,7 +159,7 @@ export default function CartItem({
               sx={{ fontSize: '1.25rem' }} // Adjust the font size here
             >
               {Array.from({ length: (remainingTickets + ticket.quantity) }, (_, i) => (
-              <MenuItem key={i} value={i + 1}>{i + 1}</MenuItem>
+                <MenuItem key={i} value={i + 1}>{i + 1}</MenuItem>
               ))}
             </Select>
           </FormControl>

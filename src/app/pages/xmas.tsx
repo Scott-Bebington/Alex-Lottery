@@ -27,20 +27,10 @@ export default function XmasDraw(
     filteredTickets,
     setFilteredTickets,
     ticketsLoaded,
-    cart,
-    setCart,
     snackbarState: {
-      snackbarOpen,
-      setSnackbarOpen,
       handleSnackbarOpen,
-      handleSnackbarClose,
-      handleSnackbarExited,
-      messageInfo,
-      snackPack
     },
     navbarProps: {
-      user,
-      setUser,
       history,
       setHistory
     }
@@ -326,7 +316,6 @@ export default function XmasDraw(
 
   return (
     <main className="flex flex-col" style={{ minHeight: "calc(100vh - 6rem)" }}>
-      {/* <Navbar /> */}
       <Typography variant="h3" className="text-center py-large">Christmas Draw</Typography>
       <section className="h-24 gap-4 px-small w-full flex justify-center">
         <Autocomplete
@@ -340,6 +329,12 @@ export default function XmasDraw(
               label='Lottery Ticket Number'
               value={ticketNumberInputValue}
               onChange={(e) => setTicketNumberInput(e.target.value)}
+              onKeyDown={(e) => {
+                // Allow only digits, Backspace, and Delete keys
+                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                  e.preventDefault();
+                }
+              }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
@@ -350,16 +345,19 @@ export default function XmasDraw(
                   },
                 },
                 '& .MuiInputLabel-root': {
-                  color: 'inherit', // Use inherit to keep the default label color
+                  color: 'inherit',
                   '&.Mui-focused': {
-                    color: 'inherit', // Change label color to red when focused
+                    color: 'inherit',
                   },
                 },
               }}
             />
           )}
           onInputChange={(event, newInputValue) => {
-            setTicketNumberInput(newInputValue);
+            // Ensure only numeric input is set programmatically
+            if (/^\d*$/.test(newInputValue)) {
+              setTicketNumberInput(newInputValue);
+            }
           }}
         />
         <FormControl sx={{ width: "25%", marginTop: "12px" }}>
