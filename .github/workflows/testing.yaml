@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20.10.0' # Change to your required Node.js version
+          node-version: '20.10.0'
 
       - name: Install dependencies
         run: npm install
@@ -29,8 +29,7 @@ jobs:
         run: npx jest --coverage
 
       - name: Upload coverage to Codecov
-        if: always()  
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage/lcov.info
@@ -54,7 +53,7 @@ jobs:
       uses: foo-software/lighthouse-check-action@v12.0.1
       with:
         urls: |
-          https://tailwaggr.web.app
+          alex-lottery-git-dev-scott-bebingtons-projects.vercel.app
         outputDirectory: './lighthouse-results'
         device: 'desktop'
       env:

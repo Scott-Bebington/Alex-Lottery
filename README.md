@@ -1,5 +1,7 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+[![codecov](https://codecov.io/github/Scott-Bebington/Alex-Lottery/graph/badge.svg?token=T65G9V4U9O)](https://codecov.io/github/Scott-Bebington/Alex-Lottery)
+
 ## Getting Started
 
 First, run the development server:
