@@ -3,13 +3,13 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, runTransaction, setDoc } from "firebase/firestore";
 import LotteryTicket from "../classes/lotteryTicket";
-import { Stripe } from "stripe";
-import { createCheckoutSession } from "./stripe";
+// import { Stripe } from "stripe";
+const { createCheckoutSession } = require("./stripe");
 import { CastConnectedSharp } from "@mui/icons-material";
 
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
-const auth = getAuth(app);
+
 
 /**
  * Retrieves the user's cart from the database.
@@ -24,6 +24,8 @@ export async function getCart(
   setCart: (cart: LotteryTicket[]) => void,
   setCartLoaded: (loaded: boolean) => void
 ) {
+  
+  const auth = getAuth(app);
 
   if (auth.currentUser === null) {
     throw new Error("User is not logged in");
@@ -34,8 +36,10 @@ export async function getCart(
 
   const cart = collection(user, "Cart");
 
-  if (cart === null) {
-    console.log("Cart is empty");
+  const cartSnapshot = await getDocs(cart);
+  if (cartSnapshot.empty) {
+    // console.log("Cart is empty");
+    setCart([]);
     setCartLoaded(true);
     return;
   }
@@ -92,6 +96,8 @@ export async function getTicket(ticketID: string, ticketType: string, setTickets
  */
 export async function addToCart(inTicket: LotteryTicket, ticketsAdded: number) {
 
+  const auth = getAuth(app);
+
   // Check if the user is logged in
   if (auth.currentUser === null) {
     throw new Error("User is not logged in");
@@ -145,10 +151,12 @@ export async function addToCart(inTicket: LotteryTicket, ticketsAdded: number) {
 
     // Check if the ticket is already in the cart
     if (cartDoc.exists()) {
+      // console.log("Ticket already exists in the cart");
       const cartData = cartDoc.data();
       const newQuantity = cartData.quantity + ticketsAdded;
       transaction.update(cartRef, { quantity: newQuantity });
     } else {
+      // console.log("Ticket does not exist in the cart");
       transaction.set(cartRef, {
         ticketId: inTicket.ticketID,
         cost: inTicket.cost,
@@ -168,6 +176,8 @@ export async function addToCart(inTicket: LotteryTicket, ticketsAdded: number) {
 }
 
 export async function removeFromCart(inTicket: LotteryTicket, ticketsRemoved: number) {
+
+  const auth = getAuth(app);
 
   // Check if the user is logged in
   if (auth.currentUser === null) {
@@ -241,31 +251,35 @@ export async function removeFromCart(inTicket: LotteryTicket, ticketsRemoved: nu
   });
 }
 
-export async function clearCart(setCart: (cart: LotteryTicket[]) => void) {
+// export async function clearCart(setCart: (cart: LotteryTicket[]) => void) {
+
+//   const auth = getAuth(app);
   
-  // Check if the user is logged in
-  if (auth.currentUser === null) {
-    throw new Error("User is not logged in");
-  }
+//   // Check if the user is logged in
+//   if (auth.currentUser === null) {
+//     throw new Error("User is not logged in");
+//   }
   
-  const userUID = auth.currentUser.uid;
+//   const userUID = auth.currentUser.uid;
   
-  const cartCollectionRef = collection(firestore, "users", userUID, "Cart");
-  const cartDocs = await getDocs(cartCollectionRef);
+//   const cartCollectionRef = collection(firestore, "users", userUID, "Cart");
+//   const cartDocs = await getDocs(cartCollectionRef);
   
-  if (cartDocs.empty) {
-    console.log("Cart is empty");
-    return;
-  }
+//   if (cartDocs.empty) {
+//     console.log("Cart is empty");
+//     return;
+//   }
   
-  cartDocs.forEach(async (doc) => {
-    await deleteDoc(doc.ref);
-  });
+//   cartDocs.forEach(async (doc) => {
+//     await deleteDoc(doc.ref);
+//   });
   
-  setCart([]);
-}
+//   setCart([]);
+// }
 
 export async function checkout(isShipping: boolean) {
+
+  const auth = getAuth(app);
 
   if (auth.currentUser === null) {
     throw new Error("User is not logged in");
@@ -278,15 +292,16 @@ export async function checkout(isShipping: boolean) {
 
   const cart = collection(user, "Cart");
 
-  if (cart === null) {
-    console.log("Cart is empty");
-    return;
+  const cartSnapshot = await getDocs(cart);
+  if (cartSnapshot.empty) {
+    // console.log("Cart is empty");
+    throw new Error("Cart is empty");
   }
 
   const session = await createCheckoutSession(isShipping);
 
 
-  console.log(session.url);
+  // console.log(session.url);
   // window.open(session.url!);
   window.location.href = session.url!;
 

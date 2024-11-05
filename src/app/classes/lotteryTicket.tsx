@@ -7,6 +7,8 @@ import { DocumentData, DocumentReference } from "firebase/firestore";
  * @param {string} type - The type of the lottery (e.g., "Powerball")
  * @param {number} quantity - The quantity of tickets purchased
  * @param {string[]} [images] - An array of image paths for the lottery ticket (optional)
+ * @param {string} ticketID - The ID of the lottery ticket
+ * @param {DocumentReference} productRef - The reference to the product document in Firestore
  */
 class LotteryTicket {
   number: number;

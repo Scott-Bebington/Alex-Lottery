@@ -1,16 +1,20 @@
 const { getRemoteConfig, getValue, fetchAndActivate, getString } = require('firebase/remote-config');
 const { initializeApp } = require('firebase/app');
 const { getFirestore, collection, addDoc, getDocs, getDoc } = require('firebase/firestore');
+// import { getAuth } from 'firebase/auth';
 const { getAuth } = require('firebase/auth');
 const firebaseConfig = require('../firebaseConfig').default;
 
 // Initialize Firebase Admin SDK for accessing Remote Config
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
 
-export const createCheckoutSession = async (isShipping) => {
+
+const createCheckoutSession = async (isShipping) => {
+  
+  const auth = getAuth(app);
+  
   if (!auth.currentUser) {
     throw new Error("User is not logged in");
   }
@@ -126,3 +130,7 @@ export const createCheckoutSession = async (isShipping) => {
 
   return session;
 }
+
+module.exports = {
+  createCheckoutSession,
+};
