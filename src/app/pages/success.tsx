@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from 'react';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import { SuccessProps } from '../interfaces/interfaces';
-import { clearCart } from '../functions/cart_functions';
 import { getAuth } from 'firebase/auth';
 import firebaseConfig from "@/app/firebaseConfig";
 import { initializeApp } from 'firebase/app';
