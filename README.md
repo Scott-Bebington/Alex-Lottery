@@ -1,3 +1,7 @@
+[![Lighthouse SEO](https://img.shields.io/badge/SEO-100-brightgreen)]
+[![Lighthouse Best Practices](https://img.shields.io/badge/Best_Practices-100-brightgreen)]
+[![Lighthouse Accessibility](https://img.shields.io/badge/Accessibility-82-brightgreen)]
+[![Lighthouse Performance](https://img.shields.io/badge/Performance-85-brightgreen)]
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
