@@ -53,7 +53,7 @@ jobs:
       uses: foo-software/lighthouse-check-action@v12.0.1
       with:
         urls: |
-          alex-lottery-git-dev-scott-bebingtons-projects.vercel.app
+          https://alex-lottery-git-dev-scott-bebingtons-projects.vercel.app
         outputDirectory: './lighthouse-results'
         device: 'desktop'
       env:
