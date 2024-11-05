@@ -300,9 +300,6 @@ export async function checkout(isShipping: boolean) {
 
   const session = await createCheckoutSession(isShipping);
 
-
-  // console.log(session.url);
-  // window.open(session.url!);
   window.location.href = session.url!;
 
 
