@@ -1,12 +1,12 @@
 import firebaseConfig from "@/app/firebaseConfig";
 import { initializeApp } from "firebase/app";
-import { AuthError, EmailAuthProvider, getAuth, GoogleAuthProvider, linkWithCredential, linkWithPopup, sendPasswordResetEmail } from "firebase/auth";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, runTransaction, setDoc, updateDoc } from "firebase/firestore";
+import { AuthError, signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword, getAuth, GoogleAuthProvider, linkWithPopup, sendPasswordResetEmail, signInWithPopup } from "firebase/auth";
+import { collection, doc, getDoc, getFirestore, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import LotteryTicket from "../classes/lotteryTicket";
-import { Stripe } from "stripe";
-import { createCheckoutSession } from "./stripe";
-import UserData from "../classes/userData";
 import PendingCollection from "../classes/pendingCollection";
+import UserData from "../classes/userData";
+import { SnackbarMessage } from "../interfaces/interfaces";
+import { checkLoginError } from "./errorChecking";
 
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
@@ -102,33 +102,6 @@ export async function getUserDetails(setUserDetails: (userDetails: any) => void,
 
   // Return unsubscribe function to stop listening to changes when the component unmounts
   return unsubscribe;
-
-}
-
-export async function checkout() {
-
-  if (auth.currentUser === null) {
-    throw new Error("User is not logged in");
-  }
-
-  const userUID = auth.currentUser.uid;
-
-  const users = collection(firestore, "users");
-  const user = doc(users, auth.currentUser.uid);
-
-  const cart = collection(user, "Cart");
-
-  if (cart === null) {
-    console.log("Cart is empty");
-    return;
-  }
-
-  const session = await createCheckoutSession();
-
-  console.log(session.url);
-  // window.open(session.url!);
-  window.location.href = session.url!;
-
 
 }
 
@@ -229,4 +202,133 @@ export async function resetPassword(email: string) {
     console.error("Error sending password reset email:", error);
   }
 }
+
+export const handleSignInWithEmailAndPassword = async (handleSnackbarOpen: (arg0: string, arg1: string) => any, email: string, password: string, setLoginText: any) => {
+
+  if (auth.currentUser) {
+    console.log('User is already logged in');
+    console.log("Email: ", auth.currentUser.email);
+    var errorMessage: SnackbarMessage = {
+      message: "You are already logged in",
+      key: 0,
+      status: "success"
+    };
+    let openSnackbar = handleSnackbarOpen(errorMessage.message, 'success');
+    openSnackbar();
+    return;
+  }
+
+  if (!email || !password) {
+    var errorMessage: SnackbarMessage = {
+      message: "Please enter your email and password",
+      key: 0,
+      status: "error"
+    };
+    let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
+    openSnackbar();
+    return;
+  }
+
+  if (email === '' || password === '') {
+    var errorMessage: SnackbarMessage = {
+      message: "Please enter your email and password",
+      key: 0,
+      status: "error"
+    };
+    let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
+    openSnackbar();
+    return;
+  }
+
+  try {
+    setLoginText('Logging in...');
+    await firebaseSignInWithEmailAndPassword(auth, email, password);
+  } catch (error: Error | any) {
+    let errorMessage: SnackbarMessage = checkLoginError(error.message);
+    let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
+    openSnackbar();
+  }
+
+  setLoginText('Login');
+};
+
+export const handleSignInWithGoogle = async (handleSnackbarOpen: (arg0: string, arg1: string) => any) => {
+  const provider = new GoogleAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+
+    // check to see if the user exists in the users collection
+    const userUID = auth.currentUser?.uid;
+    const userRef = doc(collection(firestore, "users"), userUID);
+    const userDoc = await getDoc(userRef);
+
+    if (!userDoc.exists()) {
+      console.log("User does not exist");
+      await setDoc(doc(firestore, 'users', auth.currentUser!.uid),
+        {
+          name: result.user.displayName?.split(' ')[0],
+          surname: result.user.displayName?.split(' ')[1],
+          emailLink: true,
+          googleLink: false,
+        },
+        { merge: true }
+      );
+      return;
+    }
+
+    // check to see if the name field exists
+    if (!userDoc.data().name) {
+      console.log('Name field does not exist');
+      await updateDoc(userRef, {
+        name: result.user.displayName?.split(' ')[0],
+      });
+    }
+
+    // check to see if the surname field exists
+    if (!userDoc.data().surname) {
+      console.log('Surname field does not exist');
+      await updateDoc(userRef, {
+        surname: result.user.displayName?.split(' ')[1],
+      });
+    }
+
+    // check to see if the phone field exists
+    if (!userDoc.data().phone) {
+      console.log('Phone field does not exist');
+      await updateDoc(userRef, {
+        phone: result.user.phoneNumber,
+      });
+    }
+
+    // check to see if the email and password link exists
+    if (userDoc.data().emailLink === null && userDoc.data().googleLink === null) {
+      console.log('Email Link does not exist');
+      await updateDoc(userRef, {
+        googleLink: true,
+        emailLink: false,
+      });
+    }
+
+    if (!userDoc.data().googleLink) {
+      console.log('Google Link does not exist');
+      await updateDoc(userRef, {
+        googleLink: true,
+      });
+    }
+
+    let openSnackbar = handleSnackbarOpen('You have been signed in with Google', 'success');
+    openSnackbar();
+  } catch (error: Error | any) {
+
+    if (error.code === 'Firebase: Error (auth/cancelled-popup-request).') {
+      console.log('Popup request cancelled');
+      return;
+    }
+
+    let errorMessage: SnackbarMessage = checkLoginError(error.message);
+    let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
+    openSnackbar();
+    return;
+  }
+};
 

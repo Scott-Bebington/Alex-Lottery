@@ -42,6 +42,12 @@ const config: Config = {
     '**/src/tests/integration_tests/**/*.test.ts?(x)',
   ],
 
+  transform: {
+    "^.+\\.(ts|tsx)$": "babel-jest",
+  },
+
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+
   // A list of reporter names that Jest uses when writing coverage reports
   // coverageReporters: [
   //   "json",

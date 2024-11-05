@@ -1,28 +1,25 @@
-import { Button, Divider, FormControl, Icon, IconButton, InputAdornment, InputLabel, OutlinedInput, Snackbar, TextField, Typography } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
-import { ControlPointSharp, Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import GoogleIcon from '@mui/icons-material/Google';
+import { Button, Divider, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import Footer from '../components/footer';
 
 // firebase.js
-import { initializeApp } from "firebase/app";
-import { fetchSignInMethodsForEmail, getAuth, linkWithPopup } from "firebase/auth";
 import firebaseConfig from "@/app/firebaseConfig";
-import { checkLoginError } from '../functions/errorChecking';
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 
-import { signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { LoginProps, SnackbarMessage } from '../interfaces/interfaces';
-import firebase from 'firebase/compat/app';
-import { Link, useNavigate } from 'react-router-dom';
-import { doc, collection, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
+import { handleSignInWithEmailAndPassword, handleSignInWithGoogle } from '../functions/profile_functions';
+import { LoginProps } from '../interfaces/interfaces';
 
 
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
 const auth = getAuth(app);
 
-export default function Login({
+function Login({
   snackbarState: {
     snackbarOpen,
     setSnackbarOpen,
@@ -51,143 +48,12 @@ export default function Login({
     event.preventDefault();
   };
 
-  const handleSignInWithEmailAndPassword = async () => {
-
-    if (auth.currentUser) {
-      console.log('User is already logged in');
-      console.log("Email: ", auth.currentUser.email);
-      var errorMessage: SnackbarMessage = {
-        message: "You are already logged in",
-        key: 0,
-        status: "success"
-      };
-      let openSnackbar = handleSnackbarOpen(errorMessage.message, 'success');
-      openSnackbar();
-      return;
-    }
-
-    if (!email || !password) {
-      var errorMessage: SnackbarMessage = {
-        message: "Please enter your email and password",
-        key: 0,
-        status: "error"
-      };
-      let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
-      openSnackbar();
-      return;
-    }
-
-    if (email === '' || password === '') {
-      var errorMessage: SnackbarMessage = {
-        message: "Please enter your email and password",
-        key: 0,
-        status: "error"
-      };
-      let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
-      openSnackbar();
-      return;
-    }
-
-    try {
-      setLoginText('Logging in...');
-      await firebaseSignInWithEmailAndPassword(auth, email, password);
-    } catch (error: Error | any) {
-      let errorMessage: SnackbarMessage = checkLoginError(error.message);
-      let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
-      openSnackbar();
-    }
-
-    setLoginText('Login');
-  };
-
-  const handleSignInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-
-      // check to see if the user exists in the users collection
-      const userUID = auth.currentUser?.uid;
-      const userRef = doc(collection(firestore, "users"), userUID);
-      const userDoc = await getDoc(userRef);
-
-      if (!userDoc.exists()) {
-        console.log("User does not exist");
-        await setDoc(doc(firestore, 'users', auth.currentUser!.uid),
-          {
-            name: result.user.displayName?.split(' ')[0],
-            surname: result.user.displayName?.split(' ')[1],
-            emailLink: true,
-            googleLink: false,
-          },
-          { merge: true }
-        );
-        return;
-      }
-
-      // check to see if the name field exists
-      if (!userDoc.data().name) {
-        console.log('Name field does not exist');
-        await updateDoc(userRef, {
-          name: result.user.displayName?.split(' ')[0],
-        });
-      }
-
-      // check to see if the surname field exists
-      if (!userDoc.data().surname) {
-        console.log('Surname field does not exist');
-        await updateDoc(userRef, {
-          surname: result.user.displayName?.split(' ')[1],
-        });
-      }
-
-      // check to see if the phone field exists
-      if (!userDoc.data().phone) {
-        console.log('Phone field does not exist');
-        await updateDoc(userRef, {
-          phone: result.user.phoneNumber,
-        });
-      }
-
-      // check to see if the email and password link exists
-      if (userDoc.data().emailLink === null && userDoc.data().googleLink === null) {
-        console.log('Email Link does not exist');
-        await updateDoc(userRef, {
-          googleLink: true,
-          emailLink: false,
-        });
-      }
-
-      if (!userDoc.data().googleLink) {
-        console.log('Google Link does not exist');
-        await updateDoc(userRef, {
-          googleLink: true,
-        });
-      }
-
-      let openSnackbar = handleSnackbarOpen('You have been signed in with Google', 'success');
-      openSnackbar();
-    } catch (error: Error | any) {
-
-      if (error.code === 'Firebase: Error (auth/cancelled-popup-request).') {
-        console.log('Popup request cancelled');
-        return;
-      }
-
-      let errorMessage: SnackbarMessage = checkLoginError(error.message);
-      let openSnackbar = handleSnackbarOpen(errorMessage.message, 'error');
-      openSnackbar();
-      return;
-    }
-  };
-
   // #endregion
   
 
   const signOut = async () => {
     var redirectPath = window.localStorage.getItem('redirectAfterLogin');
     console.log('Redirect path: ', redirectPath);
-
-
   }
 
   return (
@@ -237,7 +103,7 @@ export default function Login({
               backgroundColor: '#1e293b',
               color: 'white'
             }}
-            onClick={handleSignInWithEmailAndPassword}
+            onClick={() => handleSignInWithEmailAndPassword(handleSnackbarOpen, email, password, setLoginText)}
           >
             {loginText}
           </Button>
@@ -256,7 +122,7 @@ export default function Login({
             border: '1px solid #1e293b'
           }}
           startIcon={<GoogleIcon />}
-          onClick={handleSignInWithGoogle}
+          onClick={() => handleSignInWithGoogle(handleSnackbarOpen)}
         >
           Continue with Google
         </Button>
@@ -279,3 +145,5 @@ export default function Login({
     </ main>
   );
 }
+
+export default Login;
